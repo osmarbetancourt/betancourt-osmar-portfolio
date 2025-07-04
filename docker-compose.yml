@@ -1,32 +1,38 @@
 services:
   # Web service for the Django application
   web:
-    build: ./project # Tells Docker Compose to build the image using the Dockerfile inside the 'project/' directory
-    # command: python manage.py runserver 0.0.0.0:8000 # Removed for now to allow Dockerfile's CMD to run main.py
+    build: ./portfolio_project # Tells Docker Compose to build from the new folder
     volumes:
-      - ./project:/project # Mounts the 'project/' directory from your host into the container's /project directory
+      - ./portfolio_project:/portfolio_project # Mounts the new folder
     ports:
       - "8000:8000" # Maps port 8000 on your host to port 8000 in the container
     env_file:
-      - ./.env # Loads environment variables from the .env_dev file for the web service
+      - ./.env # Loads environment variables from the .env file for the web service
+    environment:
+      DJANGO_SETTINGS_MODULE: project.settings # This line is now correct for the nested 'project' module
     depends_on:
-      - db # Ensures the 'db' service starts before the 'web' service
+      db:
+        condition: service_healthy 
 
   # Database service for PostgreSQL
   db:
     image: postgres:15-alpine # Uses the official PostgreSQL 15 Alpine image
     volumes:
       - postgres_data:/var/lib/postgresql/data/ # Persistent volume for database data
-    env_file: 
-      - ./.env 
+    env_file:
+      - ./.env # Ensures the db service also loads environment variables
     environment:
-      # These variables are read by the PostgreSQL image to set up the database
-      # They will now be correctly populated from the .env_dev file via env_file.
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432" # Expose PostgreSQL port (optional for local dev if only 'web' connects)
+    healthcheck: # Health check for the database
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s # Give the database a bit of time to start before checking
 
 # Define named volume for PostgreSQL data persistence
 volumes:
