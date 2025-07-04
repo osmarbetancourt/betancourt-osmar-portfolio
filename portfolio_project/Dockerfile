@@ -14,6 +14,8 @@ WORKDIR /project
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     gcc \
+    # Install netcat for the entrypoint script's health check
+    netcat-traditional \
     # Clean up apt cache to keep image small
     && rm -rf /var/lib/apt/lists/*
 
@@ -22,9 +24,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 # Copy the rest of the application code
-# The '.' refers to the build context (your local 'project/' directory)
-# The '.' refers to the WORKDIR inside the container (/project)
 COPY . .
 
 # Expose the port Django will run on
@@ -32,4 +35,4 @@ EXPOSE 8000
 
 # Command to run the Django development server
 # This will keep the container running and serve the Django application
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]

@@ -1,3 +1,5 @@
+# portfolio_project/portfolio_app/models.py
+
 from django.db import models
 
 class Project(models.Model):
@@ -8,6 +10,8 @@ class Project(models.Model):
     description = models.TextField()
     github_link = models.URLField(blank=True, null=True)
     live_link = models.URLField(blank=True, null=True)
+    # New field for project image
+    image = models.ImageField(upload_to='project_images/', blank=True, null=True)
     technologies = models.CharField(max_length=500, help_text="Comma-separated list of technologies used")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

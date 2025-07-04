@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'portfolio_app',
     'rest_framework',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -43,6 +44,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 # These paths are correct because 'project' is now the name of the inner config module
@@ -124,3 +127,12 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer', # For development, provides a browsable API
     ]
 }
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173", # Allow your React development server
+    "http://127.0.0.1:5173", # Also include 127.0.0.1
+]
+
+# Media files (user-uploaded content)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media' # This will create a 'media' directory in your project root

@@ -4,6 +4,7 @@ services:
     build: ./portfolio_project # Tells Docker Compose to build from the new folder
     volumes:
       - ./portfolio_project:/portfolio_project # Mounts the new folder
+      - media_data:/project/media # <--- NEW: Persistent volume for media files
     ports:
       - "8000:8000" # Maps port 8000 on your host to port 8000 in the container
     env_file:
@@ -50,3 +51,4 @@ services:
 # Define named volume for PostgreSQL data persistence
 volumes:
   postgres_data:
+  media_data:
