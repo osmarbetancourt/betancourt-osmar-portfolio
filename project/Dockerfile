@@ -5,8 +5,7 @@ FROM python:3.11-slim-bullseye
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# Set the working directory in the container to /app
-# This means all subsequent commands (COPY, CMD) will be relative to /app
+# Set the working directory in the container to /project
 WORKDIR /project
 
 # Install system dependencies needed for psycopg2 (PostgreSQL adapter)
@@ -18,18 +17,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements file and install Python dependencies
-# The '.' here refers to the build context, which is 'betancourtosmar_portfolio/project/'
-# So, requirements.txt from 'project/' is copied into '/app/requirements.txt' in the container
+# We copy requirements.txt first to leverage Docker's build cache
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code
-# All files/folders from 'betancourtosmar_portfolio/project/' are copied into '/app/'
+# The '.' refers to the build context (your local 'project/' directory)
+# The '.' refers to the WORKDIR inside the container (/project)
 COPY . .
 
-# Expose the port Django will run on (still relevant for Django later, but not for this test)
+# Expose the port Django will run on
 EXPOSE 8000
 
-# Command to run the Python test file
-# Since WORKDIR is /app, this executes /app/main.py
-CMD ["python", "main.py"]
+# Command to run the Django development server
+# This will keep the container running and serve the Django application
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
