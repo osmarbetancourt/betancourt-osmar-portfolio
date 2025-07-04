@@ -1,0 +1,33 @@
+services:
+  # Web service for the Django application
+  web:
+    build: ./project # Corrected: Tells Docker Compose to build the image using the Dockerfile inside portfolio_project/
+    volumes:
+      - .:/app # Mounts the current host directory into the container's /app directory
+    ports:
+      - "8000:8000" # Maps port 8000 on your host to port 8000 in the container
+    env_file:
+      - ./.env # Loads environment variables from the .env_dev file
+    depends_on:
+      - db # Ensures the 'db' service starts before the 'web' service
+
+  # Database service for PostgreSQL
+  db:
+    image: postgres:15-alpine # Uses the official PostgreSQL 15 Alpine image
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/ # Persistent volume for database data
+    environment:
+      # These variables are read by the PostgreSQL image to set up the database
+      # Values are pulled from the .env_dev file via the 'web' service's env_file,
+      # but for the 'db' service itself, they are often set directly or via a separate .env for db.
+      # For simplicity in docker-compose, we'll ensure they are accessible.
+      # Note: For production, these would be managed by Render's environment variables.
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432" # Expose PostgreSQL port (optional for local dev if only 'web' connects)
+
+# Define named volume for PostgreSQL data persistence
+volumes:
+  postgres_data:
