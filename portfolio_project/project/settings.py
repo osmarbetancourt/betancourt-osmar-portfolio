@@ -31,7 +31,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'portfolio_app', # <-- Add your newly created app here
+    'portfolio_app',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -112,3 +113,14 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Django rest framework configuration
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny', # Allow any user to access the API for now
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer', # Default to JSON for API responses
+        'rest_framework.renderers.BrowsableAPIRenderer', # For development, provides a browsable API
+    ]
+}

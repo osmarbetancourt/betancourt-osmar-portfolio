@@ -34,6 +34,19 @@ services:
       retries: 5
       start_period: 10s # Give the database a bit of time to start before checking
 
+  frontend:
+    build:
+      context: ./frontend # Build context is the frontend directory
+      dockerfile: Dockerfile.frontend # Specify a separate Dockerfile for frontend
+    volumes:
+      - ./frontend:/app # Mount the frontend directory into the container's /app
+      - /app/node_modules # Anonymous volume to prevent host node_modules from overwriting container's
+    ports:
+      - "5173:5173" # Vite's default port
+    depends_on:
+      web:
+        condition: service_started # Frontend needs web to be started to proxy requests
+
 # Define named volume for PostgreSQL data persistence
 volumes:
   postgres_data:

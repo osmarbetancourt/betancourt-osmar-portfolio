@@ -1,3 +1,4 @@
 Django==5.0.6 # Or your preferred Django version
 python-dotenv==1.0.0 # Or the latest stable version
 psycopg2-binary==2.9.9 # Or the latest stable version for PostgreSQL database adapter
+djangorestframework==3.15.1
