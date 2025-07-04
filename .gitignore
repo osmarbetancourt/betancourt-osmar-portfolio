@@ -1,0 +1,22 @@
+# Python
+*.pyc
+__pycache__/
+*.log
+*.pot
+.Python
+
+# Virtual environment
+venv/
+env/
+
+# Environment variables (CRUCIAL for security)
+.env
+
+# IDEs
+.vscode/           # VS Code (if you have user-specific settings you don't want to share)
+
+# Django-specific
+db.sqlite3         # SQLite database file (if used locally)
+/media/            # User-uploaded media files (these should not be in version control)
+staticfiles/       # Collected static files (generated during deployment, not source code)
+*.mo               # Compiled message files for internationalization
