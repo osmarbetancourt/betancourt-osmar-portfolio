@@ -3,17 +3,21 @@ services:
   web:
     build: ./portfolio_project # Tells Docker Compose to build from the new folder
     volumes:
-      - ./portfolio_project:/portfolio_project # Mounts the new folder
-      - media_data:/project/media # <--- NEW: Persistent volume for media files
+      - ./portfolio_project:/portfolio_project # Mounts the project code
+      - media_data:/project/media # Persistent volume for media files
     ports:
-      - "8000:8000" # Maps port 8000 on your host to port 8000 in the container
+      - "8000:8000"
     env_file:
-      - ./.env # Loads environment variables from the .env file for the web service
+      - ./.env # Loads environment variables from the .env file
     environment:
-      DJANGO_SETTINGS_MODULE: project.settings # This line is now correct for the nested 'project' module
+      DJANGO_SETTINGS_MODULE: project.settings
+      # NEW: Explicitly set DATABASE_URL for local Docker Compose
+      # This ensures dj_database_url in settings.py uses the correct internal Docker host
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB}
+      PORT: 8000
     depends_on:
       db:
-        condition: service_healthy 
+        condition: service_healthy
 
   # Database service for PostgreSQL
   db:
@@ -28,13 +32,14 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432" # Expose PostgreSQL port (optional for local dev if only 'web' connects)
-    healthcheck: # Health check for the database
+    healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
       start_period: 10s # Give the database a bit of time to start before checking
 
+  # Frontend service for the React application
   frontend:
     build:
       context: ./frontend # Build context is the frontend directory
@@ -48,7 +53,7 @@ services:
       web:
         condition: service_started # Frontend needs web to be started to proxy requests
 
-# Define named volume for PostgreSQL data persistence
+# Define named volumes for data persistence
 volumes:
   postgres_data:
   media_data:

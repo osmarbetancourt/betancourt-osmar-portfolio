@@ -48,7 +48,7 @@ until python manage.py migrate --noinput; do
     exit 1 # Exit with an error code if migrations fail after max retries
   fi
   echo "Migrations failed. Retrying in ${MIGRATION_SLEEP_INTERVAL} seconds... (Attempt $MIGRATION_RETRY_COUNT/$MAX_MIGRATION_RETRIES)"
-  sleep $MIGRATION_SLERY_INTERVAL
+  sleep $MIGRATION_SLEEP_INTERVAL # FIXED TYPO HERE
 done
 echo "Database migrations applied successfully."
 

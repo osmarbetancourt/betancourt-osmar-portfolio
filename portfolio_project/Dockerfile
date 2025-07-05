@@ -41,4 +41,4 @@ ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 # Command to run the Gunicorn server (passed as arguments to entrypoint.sh)
 # This is the actual production command for your Django app
-CMD ["gunicorn", "project.wsgi:application", "--bind", "0.0.0.0:$PORT"]
+CMD gunicorn project.wsgi:application --bind 0.0.0.0:$PORT
