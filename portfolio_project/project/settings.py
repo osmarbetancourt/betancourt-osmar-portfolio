@@ -40,6 +40,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # In production, environment variables are typically set directly by the hosting platform.
 load_dotenv(BASE_DIR / '.env')
 
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
+
 # SECURITY WARNING: keep the secret key used in production secret!
 # Always get SECRET_KEY from environment variables. Provide a dummy default for local dev.
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'a-very-insecure-default-key-for-local-dev-only')
@@ -179,8 +182,10 @@ CORS_ALLOW_ALL_ORIGINS = os.environ.get('CORS_ALLOW_ALL_ORIGINS', 'False') == 'T
 # but it's good practice to define them.
 # The @csrf_exempt decorator on the chat view/URL handles the specific bypass for that endpoint.
 CSRF_COOKIE_SAMESITE = os.environ.get('CSRF_COOKIE_SAMESITE', 'Lax') # 'Lax' is good default
-CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'False') == 'True' # True in production (HTTPS)
-CSRF_TRUSTED_ORIGINS_STR = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173')
+# MODIFIED: Ensure CSRF_COOKIE_SECURE is True in production via environment variable
+CSRF_COOKIE_SECURE = os.environ.get('DJANGO_CSRF_COOKIE_SECURE', 'False') == 'True'
+# MODIFIED: Ensure CSRF_TRUSTED_ORIGINS includes Render domain via environment variable
+CSRF_TRUSTED_ORIGINS_STR = os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173')
 CSRF_TRUSTED_ORIGINS = [h.strip() for h in CSRF_TRUSTED_ORIGINS_STR.split(',') if h.strip()]
 
 
