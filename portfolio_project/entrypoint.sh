@@ -3,9 +3,13 @@ set -e # Exit immediately if a command exits with a non-zero status.
 
 # portfolio_project/entrypoint.sh
 
+# Get the database host from environment variable, default to 'db' for local Docker Compose
+DB_HOST=${DB_HOST:-db}
+DB_PORT=${DB_PORT:-5432} # Get DB port from env, default to 5432
+
 # Wait for PostgreSQL to be reachable on the network level
-echo "Waiting for PostgreSQL to be reachable..."
-while ! nc -z db 5432; do
+echo "Waiting for PostgreSQL at ${DB_HOST}:${DB_PORT} to be reachable..."
+while ! nc -z "$DB_HOST" "$DB_PORT"; do
   sleep 0.5
 done
 echo "PostgreSQL is reachable."
@@ -13,7 +17,7 @@ echo "PostgreSQL is reachable."
 # Wait for PostgreSQL to be ready for Django connections and apply migrations
 # This loop attempts to run 'migrate' and retries if it fails due to connection issues,
 # giving the database more time to fully initialize.
-MAX_RETRIES=15 # Increased retries
+MAX_RETRIES=15
 RETRY_COUNT=0
 SLEEP_INTERVAL=2 # Seconds to wait between retries
 
