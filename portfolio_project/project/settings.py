@@ -191,6 +191,7 @@ CSRF_TRUSTED_ORIGINS = [h.strip() for h in CSRF_TRUSTED_ORIGINS_STR.split(',') i
 
 # Media files (user-uploaded content)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media' # This will create a 'media' directory in your project root
+# MODIFIED: Set MEDIA_ROOT to the absolute path of the Docker volume mount
+MEDIA_ROOT = '/project/media'
 
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
