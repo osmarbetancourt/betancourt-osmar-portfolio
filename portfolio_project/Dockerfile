@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     gcc \
     netcat-traditional \
-    postgresql-client \ # <--- ADDED THIS LINE for pg_isready
+    postgresql-client \
     # Clean up apt cache to keep image small
     && rm -rf /var/lib/apt/lists/*
 
