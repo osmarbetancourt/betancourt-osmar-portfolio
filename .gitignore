@@ -11,6 +11,7 @@ env/
 
 # Environment variables (CRUCIAL for security)
 .env
+*.env
 
 # IDEs
 .vscode/           # VS Code (if you have user-specific settings you don't want to share)
