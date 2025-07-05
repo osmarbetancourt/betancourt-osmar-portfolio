@@ -1,7 +1,35 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-import dj_database_url # NEW: Import dj_database_url
+import dj_database_url
+import logging # Added for logging configuration
+
+# Configure logging to show more details for debugging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO', # Set to INFO for more detailed Django logs
+            'propagate': False,
+        },
+        'django.security.DisallowedHost': { # Specific logger for ALLOWED_HOSTS errors
+            'handlers': ['console'],
+            'level': 'CRITICAL', # Log these errors at CRITICAL level
+            'propagate': False,
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+}
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # BASE_DIR is now the 'portfolio_project' directory
@@ -11,9 +39,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # This line should only be active for local development.
 # In production, environment variables are typically set directly by the hosting platform.
 load_dotenv(BASE_DIR / '.env')
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # Always get SECRET_KEY from environment variables. Provide a dummy default for local dev.
@@ -44,7 +69,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # Added WhiteNoiseMiddleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -70,7 +95,6 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                #'django.template.context_processors.messages',
                 'django.contrib.messages.context_processors.messages',
             ],
         },
@@ -88,8 +112,6 @@ DATABASES = {
         ssl_require=os.environ.get('DATABASE_SSL_REQUIRE', 'False') == 'True' # NEW: SSL config
     )
 }
-
-# Removed DB_HOST and DB_PORT definitions as they are now parsed directly in entrypoint.sh
 
 
 # Password validation
@@ -122,19 +144,23 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # Added WhiteNoise static files storage
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Django rest framework configuration
+# Django REST Framework configuration
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny', # Allow any user to access the API for now
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly', # MODIFIED: Allow read-only for unauthenticated
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [ # NEW: Add authentication classes
+        'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication', # Consider TokenAuthentication for API clients
     ],
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer', # Default to JSON for API responses
         'rest_framework.renderers.BrowsableAPIRenderer', # For development, provides a browsable API
     ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [], # Explicitly disable authentication for these API endpoints
 }
 
 # CORS Headers settings
