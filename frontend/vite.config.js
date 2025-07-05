@@ -1,10 +1,16 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
+import https from 'https'; // <--- NEW: Import https module
+
+// Create an HTTPS agent for the proxy to handle SSL connections
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: false, // Set to false to bypass SSL certificate validation (use with caution)
+  // You might need to set this to true in a more secure setup if you have a custom CA
+});
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   // Load environment variables based on the current mode (development, production)
-  // This ensures process.env is populated for use in defineConfig
   const env = loadEnv(mode, process.cwd(), 'VITE_');
 
   // Parse allowed hosts for the frontend preview server
@@ -20,27 +26,27 @@ export default defineConfig(({ mode }) => {
       proxy: {
         // Proxy API requests from React to Django backend
         '/api': {
-          // Use the environment variable for the target URL
           target: env.VITE_APP_BACKEND_URL,
-          changeOrigin: true,        // Changes the origin header to the target URL
+          changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api/, '/api'),
-          secure: false, // Use secure: false for HTTPS targets if you encounter SSL issues, otherwise true or omit
+          secure: false, // Keep this false for now, as the agent might handle it
+          agent: httpsAgent, // <--- NEW: Use the custom HTTPS agent
         },
         // Proxy media file requests from React to Django backend
         '/media': {
-          // Use the environment variable for the target URL
           target: env.VITE_APP_BACKEND_URL,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/media/, '/media'),
-          secure: false, // Use secure: false for HTTPS targets if you encounter SSL issues, otherwise true or omit
+          secure: false, // Keep this false for now
+          agent: httpsAgent, // <--- NEW: Use the custom HTTPS agent
         },
       }
     },
-    // NEW: Configuration for Vite's preview server
+    // Configuration for Vite's preview server
     preview: {
-      host: '0.0.0.0', // Ensure preview server listens on all interfaces
-      port: 5173,      // Explicitly set preview server's port
-      allowedHosts: frontendAllowedHosts, // <--- NEW: Dynamically set allowed hosts
+      host: '0.0.0.0',
+      port: 5173,
+      allowedHosts: frontendAllowedHosts,
     },
     // Ensure the build output directory is 'dist' (default for Vite)
     build: {
