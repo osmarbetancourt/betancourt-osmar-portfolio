@@ -9,13 +9,13 @@ ENV PYTHONPATH /portfolio_project # Ensure this path is correct for your project
 # Set the working directory in the container to /portfolio_project
 WORKDIR /portfolio_project
 
-# Install system dependencies needed for psycopg2 (PostgreSQL adapter)
+# Install system dependencies needed for psycopg2 (PostgreSQL adapter) and pg_isready
 # This ensures that the 'psycopg2-binary' Python package can be installed successfully
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     gcc \
-    # Install netcat for the entrypoint script's health check
     netcat-traditional \
+    postgresql-client \ # <--- ADDED THIS LINE for pg_isready
     # Clean up apt cache to keep image small
     && rm -rf /var/lib/apt/lists/*
 

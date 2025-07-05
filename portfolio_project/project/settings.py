@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+import dj_database_url # NEW: Import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # BASE_DIR is now the 'portfolio_project' directory
@@ -68,7 +69,7 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.messages',
             ],
         },
     },
@@ -76,16 +77,17 @@ TEMPLATES = [
 
 
 # Database
+# Use dj_database_url to parse the DATABASE_URL environment variable
+# This is the recommended way to handle database connections in production on Render
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_DB'),
-        'USER': os.environ.get('POSTGRES_USER'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-        'HOST': os.environ.get('POSTGRES_HOST'),
-        'PORT': os.environ.get('POSTGRES_PORT'),
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL', 'postgres://user:password@localhost:5432/dbname'), # Fallback for local
+        conn_max_age=600, # Optional: Max age of database connections
+        ssl_require=os.environ.get('DATABASE_SSL_REQUIRE', 'False') == 'True' # NEW: SSL config
+    )
 }
+
+# Removed DB_HOST and DB_PORT definitions as they are now parsed directly in entrypoint.sh
 
 
 # Password validation
@@ -137,7 +139,7 @@ REST_FRAMEWORK = {
 # In production, CORS_ALLOWED_ORIGINS should be explicitly set to your frontend's domain(s)
 # via environment variables. For local development, localhost is included.
 CORS_ALLOWED_ORIGINS_STR = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173')
-CORS_ALLOWED_ORIGINS = [o.strip() for o in CORS_ALLOWED_ORIGINS_STR.split(',') if o.strip()]
+CORS_ALLOWED_ORIGINS = [h.strip() for h in CORS_ALLOWED_ORIGINS_STR.split(',') if h.strip()]
 
 # CORS_ALLOW_ALL_ORIGINS should always be False in production.
 CORS_ALLOW_ALL_ORIGINS = os.environ.get('CORS_ALLOW_ALL_ORIGINS', 'False') == 'True'
@@ -151,7 +153,7 @@ CORS_ALLOW_ALL_ORIGINS = os.environ.get('CORS_ALLOW_ALL_ORIGINS', 'False') == 'T
 CSRF_COOKIE_SAMESITE = os.environ.get('CSRF_COOKIE_SAMESITE', 'Lax') # 'Lax' is good default
 CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'False') == 'True' # True in production (HTTPS)
 CSRF_TRUSTED_ORIGINS_STR = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173')
-CSRF_TRUSTED_ORIGINS = [o.strip() for o in CSRF_TRUSTED_ORIGINS_STR.split(',') if o.strip()]
+CSRF_TRUSTED_ORIGINS = [h.strip() for h in CSRF_TRUSTED_ORIGINS_STR.split(',') if h.strip()]
 
 
 # Media files (user-uploaded content)
