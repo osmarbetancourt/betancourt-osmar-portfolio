@@ -3,23 +3,17 @@ set -e # Exit immediately if a command exits with a non-zero status.
 
 # portfolio_project/entrypoint.sh
 
+# Echo the DATABASE_URL for debugging purposes
+echo "DATABASE_URL: $DATABASE_URL"
+
 # Use Python's urllib.parse to reliably extract components from DATABASE_URL
-# Render provides DATABASE_URL as an environment variable
-DATABASE_URL_VAR="$DATABASE_URL" # Get the DATABASE_URL environment variable
+# Render provides DATABASE_URL as an environment variable directly to the process environment.
 
-# Extract components using Python's urllib.parse
-DB_HOST=$(python -c "import os, urllib.parse; url = urllib.parse.urlparse(os.environ.get('DATABASE_URL_VAR', '')); print(url.hostname or 'db')" || echo "db")
-DB_PORT=$(python -c "import os, urllib.parse; url = urllib.parse.urlparse(os.environ.get('DATABASE_URL_VAR', '')); print(url.port or '5432')" || echo "5432")
-DB_USER=$(python -c "import os, urllib.parse; url = urllib.parse.urlparse(os.environ.get('DATABASE_URL_VAR', '')); print(url.username or 'django_user')" || echo "django_user")
-DB_NAME=$(python -c "import os, urllib.parse; url = urllib.parse.urlparse(os.environ.get('DATABASE_URL_VAR', '')); print(url.path[1:] or 'django_db')" || echo "django_db")
-
-# Fallback for local development if DATABASE_URL is not fully set (though it should be on Render)
-# These fallbacks are now handled by the python -c commands, but kept for clarity if needed elsewhere.
-# DB_HOST=${DB_HOST:-db}
-# DB_PORT=${DB_PORT:-5432}
-# DB_USER=${DB_USER:-django_user}
-# DB_NAME=${DB_NAME:-django_db}
-
+# Extract components using Python's urllib.parse, directly accessing DATABASE_URL from os.environ
+DB_HOST=$(python -c "import os, urllib.parse; url = urllib.parse.urlparse(os.environ.get('DATABASE_URL', '')); print(url.hostname or 'db')" || echo "db")
+DB_PORT=$(python -c "import os, urllib.parse; url = urllib.parse.urlparse(os.environ.get('DATABASE_URL', '')); print(url.port or '5432')" || echo "5432")
+DB_USER=$(python -c "import os, urllib.parse; url = urllib.parse.urlparse(os.environ.get('DATABASE_URL', '')); print(url.username or 'django_user')" || echo "django_user")
+DB_NAME=$(python -c "import os, urllib.parse; url = urllib.parse.urlparse(os.environ.get('DATABASE_URL', '')); print(url.path[1:] or 'django_db')" || echo "django_db")
 
 # Wait for PostgreSQL to be ready using pg_isready
 # This is more robust than nc -z for PostgreSQL
@@ -54,7 +48,7 @@ until python manage.py migrate --noinput; do
     exit 1 # Exit with an error code if migrations fail after max retries
   fi
   echo "Migrations failed. Retrying in ${MIGRATION_SLEEP_INTERVAL} seconds... (Attempt $MIGRATION_RETRY_COUNT/$MAX_MIGRATION_RETRIES)"
-  sleep $MIGRATION_SLEEP_INTERVAL
+  sleep $MIGRATION_SLERY_INTERVAL
 done
 echo "Database migrations applied successfully."
 
