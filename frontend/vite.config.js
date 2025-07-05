@@ -1,12 +1,6 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
-import https from 'https'; // <--- NEW: Import https module
-
-// Create an HTTPS agent for the proxy to handle SSL connections
-const httpsAgent = new https.Agent({
-  rejectUnauthorized: false, // Set to false to bypass SSL certificate validation (use with caution)
-  // You might need to set this to true in a more secure setup if you have a custom CA
-});
+import https from 'https'; // Import https module
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -17,6 +11,14 @@ export default defineConfig(({ mode }) => {
   const frontendAllowedHosts = env.VITE_APP_FRONTEND_HOSTS ?
     env.VITE_APP_FRONTEND_HOSTS.split(',').map(host => host.trim()) :
     [];
+
+  // Conditionally create HTTPS agent only if the backend URL is HTTPS
+  let proxyAgent = undefined; // Default to no agent
+  if (env.VITE_APP_BACKEND_URL && env.VITE_APP_BACKEND_URL.startsWith('https://')) {
+    proxyAgent = new https.Agent({
+      rejectUnauthorized: false, // Set to false to bypass SSL certificate validation (use with caution)
+    });
+  }
 
   return {
     plugins: [react()],
@@ -29,16 +31,16 @@ export default defineConfig(({ mode }) => {
           target: env.VITE_APP_BACKEND_URL,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api/, '/api'),
-          secure: false, // Keep this false for now, as the agent might handle it
-          agent: httpsAgent, // <--- NEW: Use the custom HTTPS agent
+          secure: false, // Keep this false, as the agent (if used) will handle SSL
+          agent: proxyAgent, // <--- MODIFIED: Conditionally use the custom HTTPS agent
         },
         // Proxy media file requests from React to Django backend
         '/media': {
           target: env.VITE_APP_BACKEND_URL,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/media/, '/media'),
-          secure: false, // Keep this false for now
-          agent: httpsAgent, // <--- NEW: Use the custom HTTPS agent
+          secure: false, // Keep this false
+          agent: proxyAgent, // <--- MODIFIED: Conditionally use the custom HTTPS agent
         },
       }
     },

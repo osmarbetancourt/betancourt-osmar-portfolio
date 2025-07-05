@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // Corrected import syntax
+import React, { useState, useEffect, useRef } from 'react';
 import './index.css'; // Assuming you have an index.css for basic styling
 import ChatbotPopup from './components/ChatbotPopup'; // Import the new ChatbotPopup component
 
@@ -7,6 +7,7 @@ export default function App() {
   const [loading, setLoading] = useState(true); // State to manage loading status
   const [error, setError] = useState(null);   // State to store any fetch errors
   const [isChatbotOpen, setIsChatbotOpen] = useState(false); // State for chatbot popup visibility
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // <--- NEW: State for mobile menu visibility
 
   // Hardcoded certifications data for display
   const certifications = [
@@ -118,14 +119,39 @@ export default function App() {
     );
   }
 
+  // Function to close mobile menu after clicking a link
+  const handleNavLinkClick = () => {
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 font-inter">
-      {/* Top Banner Section - Now includes navigation links */}
-      <div className="w-full h-16 bg-gradient-to-r from-blue-600 to-purple-700 flex items-center justify-between px-4 sm:px-8 text-white shadow-md">
+      {/* Top Banner Section - Now includes responsive navigation */}
+      <div className="w-full h-16 bg-gradient-to-r from-blue-600 to-purple-700 flex items-center justify-between px-4 sm:px-8 text-white shadow-md relative z-10">
         {/* Placeholder for potential logo or site title on the left */}
         <div className="text-xl font-semibold">Osmar's Portfolio</div>
-        {/* Navigation Links on the right */}
-        <nav className="flex space-x-4 sm:space-x-6">
+
+        {/* Hamburger Menu Icon for Mobile */}
+        <div className="md:hidden">
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="text-white focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-md p-2"
+            aria-label="Toggle navigation menu"
+          >
+            {isMobileMenuOpen ? (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            ) : (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
+              </svg>
+            )}
+          </button>
+        </div>
+
+        {/* Desktop Navigation Links */}
+        <nav className="hidden md:flex space-x-4 sm:space-x-6">
           <a href="#experience" className="text-lg hover:text-blue-200 transition-colors duration-200">
             Experience
           </a>
@@ -135,12 +161,31 @@ export default function App() {
           <a href="#contact-me" className="text-lg hover:text-blue-200 transition-colors duration-200">
             Contact Me
           </a>
-          {/* Re-added the "Try my AI Model" link to the navigation */}
           <a href="/chat" target="_blank" rel="noopener noreferrer" className="text-lg hover:text-blue-200 transition-colors duration-200">
             Try my AI Model
           </a>
         </nav>
       </div>
+
+      {/* Mobile Navigation Menu (visible when isMobileMenuOpen is true) */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-blue-700 text-white shadow-lg py-4 absolute w-full z-0">
+          <nav className="flex flex-col items-center space-y-4">
+            <a href="#experience" className="text-lg hover:text-blue-200 transition-colors duration-200 w-full text-center py-2" onClick={handleNavLinkClick}>
+              Experience
+            </a>
+            <a href="#certifications" className="text-lg hover:text-blue-200 transition-colors duration-200 w-full text-center py-2" onClick={handleNavLinkClick}>
+              Certifications
+            </a>
+            <a href="#contact-me" className="text-lg hover:text-blue-200 transition-colors duration-200 w-full text-center py-2" onClick={handleNavLinkClick}>
+              Contact Me
+            </a>
+            <a href="/chat" target="_blank" rel="noopener noreferrer" className="text-lg hover:text-blue-200 transition-colors duration-200 w-full text-center py-2" onClick={handleNavLinkClick}>
+              Try my AI Model
+            </a>
+          </nav>
+        </div>
+      )}
 
       <header className="text-center py-8 p-4 sm:p-8">
         <h1 className="text-4xl font-bold text-gray-800">My Portfolio</h1>
