@@ -8,6 +8,7 @@ from django.conf import settings # Import settings to access GEMINI_API_KEY
 import requests # Used to make HTTP requests to external APIs (Gemini)
 import json # Used for JSON manipulation
 from django.views.decorators.csrf import csrf_exempt # Import csrf_exempt
+from django.http import HttpResponse # <--- NEW: Import HttpResponse for health_check
 
 from .models import Project
 from .serializers import ProjectSerializer
@@ -27,6 +28,14 @@ class ProjectViewSet(viewsets.ModelViewSet):
         This is necessary for ImageField to generate absolute URLs.
         """
         return {'request': self.request}
+
+# <--- NEW: Health check function re-added
+def health_check(request):
+    """
+    A simple health check endpoint for Render.
+    Returns a 200 OK response.
+    """
+    return HttpResponse("OK", status=200)
 
 @api_view(['POST']) # Decorator to specify that this view only accepts POST requests
 @permission_classes([AllowAny]) # Allows unauthenticated access for now
@@ -129,3 +138,30 @@ def gemini_chat_view(request):
             {"error": "An unexpected error occurred"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+# Placeholder view for the custom AI model
+@api_view(['POST']) # This view will also accept POST requests
+@csrf_exempt # Temporarily exempt for testing, consider proper CSRF handling in production
+def custom_ai_model_view(request):
+    """
+    Placeholder view for the custom AI model.
+    This will be expanded later to integrate with your trained LLM.
+    """
+    try:
+        data = json.loads(request.body)
+        user_input = data.get('input') # Expecting 'input' from the frontend
+
+        if not user_input:
+            return Response({'error': 'Input field is required for custom AI model'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Placeholder logic: In a real scenario, you'd load your custom model here,
+        # process the input, and generate a response.
+        ai_response = f"Hello! You asked about: '{user_input}'. This is a placeholder response from your custom AI model. The actual model integration will be implemented later."
+
+        return Response({'response': ai_response}, status=status.HTTP_200_OK)
+
+    except json.JSONDecodeError:
+        return Response({'error': 'Invalid JSON in request body'}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print(f"Error in custom_ai_model_view: {e}")
+        return Response({'error': 'An error occurred with the custom AI model placeholder'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
