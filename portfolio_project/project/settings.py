@@ -161,8 +161,9 @@ CORS_ALLOW_ALL_ORIGINS = os.environ.get('CORS_ALLOW_ALL_ORIGINS', 'False') == 'T
 
 # CSRF Configuration for Production/Development
 CSRF_COOKIE_SAMESITE = os.environ.get('CSRF_COOKIE_SAMESITE', 'Lax')
-CSRF_COOKIE_SECURE = os.environ.get('DJANGO_CSRF_COOKIE_SECURE', 'False') == 'True'
-CSRF_TRUSTED_ORIGINS_STR = os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173')
+# MODIFIED: Ensure CSRF_COOKIE_SECURE is False when DEBUG is True for local http
+CSRF_COOKIE_SECURE = False if DEBUG else os.environ.get('DJANGO_CSRF_COOKIE_SECURE', 'False') == 'True'
+CSRF_TRUSTED_ORIGINS_STR = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173')
 CSRF_TRUSTED_ORIGINS = [h.strip() for h in CSRF_TRUSTED_ORIGINS_STR.split(',') if h.strip()]
 
 # Essential for Django behind an SSL-terminating proxy like Render
@@ -178,3 +179,14 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = '/project/media' # Absolute path for Docker volume/Render Persistent Disk
 
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
+
+# --- Hugging Face Inference Endpoint Settings (NEW) ---
+# This is the ID of your fine-tuned model on Hugging Face Hub.
+# For a deployed Inference Endpoint, this would be the endpoint URL.
+# For the public inference API, it's the model ID (e.g., "betancourtosmar/fine-tuned-mistral-django-qa")
+HF_MODEL_ID = os.getenv('HF_MODEL_ID', 'betancourtosmar/fine-tuned-mistral-django-qa') # Default to your model ID
+HF_API_TOKEN = os.getenv('HF_API_TOKEN') # Your Hugging Face API token (read access)
+
+# --- Google reCAPTCHA Settings (NEW) ---
+# Your reCAPTCHA Secret Key (obtained from Google reCAPTCHA Admin Console)
+RECAPTCHA_SECRET_KEY = os.getenv('RECAPTCHA_SECRET_KEY')

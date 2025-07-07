@@ -7,25 +7,75 @@ export default function CustomAIModelPage() {
   const [messages, setMessages] = useState([]); // State to store chat messages
   const [inputMessage, setInputMessage] = useState(''); // State for the current input message
   const [isSending, setIsSending] = useState(false); // State to indicate if a message is being sent
+  const [recaptchaToken, setRecaptchaToken] = useState(null); // State to store the reCAPTCHA token
+  const [recaptchaError, setRecaptchaError] = useState(null); // State to store reCAPTCHA errors
   const messagesEndRef = useRef(null); // Ref for scrolling to the latest message
-
-  // Scroll to bottom whenever messages update
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
 
   // Function to scroll to the bottom of the chat window
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Scroll to bottom whenever messages update
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  // Load reCAPTCHA script dynamically and render the widget
+  useEffect(() => {
+    const scriptId = 'recaptcha-script';
+    // Ensure the script is only added once
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement('script');
+      script.id = scriptId;
+      // The 'onload' parameter points to a global function that reCAPTCHA will call when it's ready
+      script.src = `https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit`;
+      script.async = true;
+      script.defer = true;
+
+      // Define the global callback function for reCAPTCHA
+      window.onloadCallback = function() {
+        // Render the reCAPTCHA widget into the div with id 'recaptcha-widget'
+        if (document.getElementById('recaptcha-widget')) {
+          grecaptcha.render('recaptcha-widget', {
+            sitekey: import.meta.env.VITE_RECAPTCHA_SITE_KEY, // Use the site key from environment variables
+            callback: function(token) {
+              // This function is called when the user successfully completes the reCAPTCHA
+              setRecaptchaToken(token);
+              setRecaptchaError(null); // Clear any previous errors
+            },
+            'expired-callback': function() {
+              // This function is called when the reCAPTCHA token expires
+              setRecaptchaToken(null);
+              setRecaptchaError('reCAPTCHA token expired. Please re-verify.');
+              // You might want to re-render the widget or prompt the user to re-verify
+            },
+            'error-callback': function() {
+              // This function is called if there's an error with reCAPTCHA
+              setRecaptchaToken(null);
+              setRecaptchaError('reCAPTCHA encountered an error. Please try again.');
+            }
+          });
+        }
+      };
+      document.body.appendChild(script);
+    }
+  }, []); // Empty dependency array ensures this runs only once on component mount
+
   const handleSendToAI = async () => {
     if (inputMessage.trim() === '' || isSending) return;
+
+    // Check if reCAPTCHA token is available
+    if (!recaptchaToken) {
+      setRecaptchaError('Please complete the reCAPTCHA challenge.');
+      return;
+    }
 
     const newUserMessage = { sender: 'user', text: inputMessage.trim() };
     setMessages((prevMessages) => [...prevMessages, newUserMessage]);
     setInputMessage(''); // Clear input immediately
     setIsSending(true); // Set sending state to true
+    setRecaptchaError(null); // Clear reCAPTCHA error on new send attempt
 
     try {
       const apiUrl = '/api/custom-ai-model/'; // Your Django backend endpoint
@@ -34,7 +84,10 @@ export default function CustomAIModelPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ input: newUserMessage.text }), // Send user's message as 'input'
+        body: JSON.stringify({
+          input: newUserMessage.text,
+          recaptcha_token: recaptchaToken, // Include the reCAPTCHA token in the request
+        }),
       });
 
       if (!res.ok) {
@@ -50,6 +103,11 @@ export default function CustomAIModelPage() {
       setMessages((prevMessages) => [...prevMessages, { sender: 'ai', text: `Error: ${err.message}. Please try again.` }]);
     } finally {
       setIsSending(false); // Reset sending state
+      // Reset the reCAPTCHA widget after submission to allow for a new challenge
+      if (typeof grecaptcha !== 'undefined' && grecaptcha.reset) {
+        grecaptcha.reset();
+        setRecaptchaToken(null); // Clear the token in state
+      }
     }
   };
 
@@ -87,8 +145,10 @@ export default function CustomAIModelPage() {
       <div className="w-full max-w-3xl bg-zinc-900 rounded-xl shadow-lg flex flex-col h-[85vh] sm:h-[80vh] overflow-hidden border border-zinc-800"> {/* Darker chat container */}
         {/* Chat Header */}
         <div className="p-4 bg-zinc-800 text-gray-100 text-center rounded-t-xl shadow-md flex justify-between items-center border-b border-zinc-700"> {/* Darker header */}
-          <h1 className="text-2xl font-bold font-inter">Your Custom AI Model</h1>
-          <a href="/" className="text-gray-400 hover:text-white transition-colors duration-200 text-2xl font-bold leading-none" aria-label="Back to Portfolio">
+          {/* Changed header text to reflect the AI model */}
+          <h1 className="text-2xl font-bold font-inter">Mistral-7B-Instruct-v0.2 Chat</h1>
+          <a href="/" className="text-gray-400 hover:text-white transition-colors duration-200 text-2xl font-bold leading-none flex items-center" aria-label="Back to Portfolio">
+            <svg className="w-6 h-6 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             &times; {/* HTML entity for multiplication sign, commonly used for close buttons */}
           </a>
         </div>
@@ -133,6 +193,13 @@ export default function CustomAIModelPage() {
           <div ref={messagesEndRef} /> {/* Empty div for scrolling */}
         </div>
 
+        {/* reCAPTCHA Error Display */}
+        {recaptchaError && (
+          <div className="p-2 text-center text-red-400 bg-zinc-800 border-t border-zinc-700">
+            {recaptchaError}
+          </div>
+        )}
+
         {/* Message Input and Send Button */}
         <div className="p-4 border-t border-zinc-700 flex items-center bg-zinc-900 rounded-b-xl"> {/* Darker input area */}
           <textarea
@@ -148,10 +215,15 @@ export default function CustomAIModelPage() {
           <button
             onClick={handleSendToAI}
             className="ml-3 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75 transition duration-200 ease-in-out font-bold font-inter flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed" // Solid blue for send button
-            disabled={isSending} // Disable button while sending
+            disabled={isSending || !recaptchaToken} // Disable button if sending or no reCAPTCHA token
           >
             {isSending ? 'Sending...' : 'Send'}
           </button>
+        </div>
+
+        {/* reCAPTCHA widget container */}
+        <div className="p-4 flex justify-center bg-zinc-900 rounded-b-xl">
+          <div id="recaptcha-widget"></div>
         </div>
       </div>
     </div>

@@ -131,7 +131,8 @@ export default function App() {
             {/* Hero Section */}
             <section className="bg-white rounded-lg shadow-lg p-8 md:p-12 mt-8 mb-12 text-center max-w-4xl mx-auto flex flex-col items-center">
               <img
-                src="https://media.licdn.com/dms/image/v2/C5603AQGgbjWnJFvsYw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1614112552998?e=1756944000&v=beta&t=XgMuj9qVpedybusnkHmKUbzgRY12QKYQOJZwEG7Usio" // Updated with your LinkedIn profile picture
+                // Corrected LinkedIn profile picture URL
+                src="https://media.licdn.com/dms/image/v2/C5603AQGgbjWnJFvsYw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1614112552998?e=1756944000&v=beta&t=XgMuj9qVpedybusnkHmKUbzgRY12QKYQOJZwEG7Usio"
                 alt="Osmar Betancourt"
                 className="w-32 h-32 rounded-full object-cover border-4 border-purple-500 shadow-md mb-6"
               />
@@ -232,7 +233,7 @@ export default function App() {
                       <h3 className="text-2xl font-bold text-gray-900 mb-1">{job.title}</h3>
                       <p className="text-xl text-purple-600 mb-2">{job.company}</p>
                       <p className="text-gray-600 text-base mb-2">{job.dates} | {job.location}</p>
-                      <ul className="list-disc list-inside text-gray-700 space-y-1 mt-4">
+                      <ul className="list-disc list-inside text-gray-70-0 space-y-1 mt-4">
                         {job.description.map((point, index) => (
                           <li key={index}>{point}</li>
                         ))}
@@ -347,7 +348,12 @@ export default function App() {
       {/* Top Banner Section - Now includes responsive navigation */}
       <div className="w-full h-16 bg-gradient-to-r from-blue-600 to-purple-700 flex items-center justify-between px-4 sm:px-8 text-white shadow-md relative z-10">
         {/* Placeholder for potential logo or site title on the left */}
-        <div className="text-xl font-semibold">Osmar's Portfolio</div>
+        <div className="text-xl font-semibold">
+          {/* Made "Osmar's Portfolio" a link to the main page */}
+          <a href="/" className="hover:text-blue-200 transition-colors duration-200">
+            Osmar's Portfolio
+          </a>
+        </div>
 
         {/* Hamburger Menu Icon for Mobile */}
         <div className="md:hidden">
@@ -379,8 +385,9 @@ export default function App() {
           <a href="#contact-me" className="text-lg hover:text-blue-200 transition-colors duration-200">
             Contact Me
           </a>
-          <a href="/custom-ai" className="text-lg hover:text-blue-200 transition-colors duration-200"> {/* <-- MODIFIED: Changed href to /custom-ai */}
-            Try my AI Model
+          {/* Changed "Try my AI Model" to "Try other AI models" */}
+          <a href="/custom-ai" className="text-lg hover:text-blue-200 transition-colors duration-200">
+            Try other AI models
           </a>
         </nav>
       </div>
@@ -398,8 +405,9 @@ export default function App() {
             <a href="#contact-me" className="text-lg hover:text-blue-200 transition-colors duration-200 w-full text-center py-2" onClick={handleNavLinkClick}>
               Contact Me
             </a>
-            <a href="/custom-ai" className="text-lg hover:text-blue-200 transition-colors duration-200 w-full text-center py-2" onClick={handleNavLinkClick}> {/* <-- MODIFIED: Changed href to /custom-ai */}
-              Try my AI Model
+            {/* Changed "Try my AI Model" to "Try other AI models" */}
+            <a href="/custom-ai" className="text-lg hover:text-blue-200 transition-colors duration-200 w-full text-center py-2" onClick={handleNavLinkClick}>
+              Try other AI models
             </a>
           </nav>
         </div>

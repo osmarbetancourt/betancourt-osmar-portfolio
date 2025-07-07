@@ -20,7 +20,7 @@ This application is fully deployed and accessible online:
 
 * **Frontend (Portfolio Website):** <https://www.betancourtosmar.com/>
     * *(Note: The apex domain `betancourtosmar.com` should redirect to `www.betancourtosmar.com`.)*
-* **Backend (API):** [https://api.betancourtosmar.com/](https://api.betancourtosmar.com/)
+* **Backend (API):** Available at its designated API endpoint.
     * *(You can access the browsable API at `/api/projects/` or `/api/chat/`.)*
 
 ## Architecture
@@ -33,7 +33,7 @@ The project follows a modern decoupled architecture:
 * **Persistent Storage:** User-uploaded media files (like project images) are stored on a **Render Persistent Disk** for durability.
 * **Containerization:** Both frontend and backend services are containerized using **Docker** and orchestrated locally with **Docker Compose**.
 * **Deployment:** All services are deployed on **Render**, leveraging its capabilities for web services, databases, and persistent disks.
-* **AI Integration:** Features an interactive **AI Chatbot** powered by the **Google Gemini API** for dynamic interactions.
+* **AI Integration:** Features an interactive **AI Chatbot** powered by the **Google Gemini API** for dynamic interactions, and also integrates with the **Mistral-7B-Instruct-v0.2** model for a custom AI chat experience.
 
 ## Features
 
@@ -50,7 +50,7 @@ To run this project locally using Docker Compose, ensure you have Docker Desktop
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/osmarbetancourt/betancourt-osmar-portfolio.git](https://github.com/osmarbetancourt/betancourt-osmar-portfolio.git)
+    git clone https://github.com/osmarbetancourt/betancourt-osmar-portfolio.git
     cd betancourt-osmar-portfolio
     ```
 
@@ -72,19 +72,29 @@ To run this project locally using Docker Compose, ensure you have Docker Desktop
     # Google Gemini API Key (for local AI chatbot functionality)
     GEMINI_API_KEY=your_gemini_api_key_here
 
+    # Hugging Face Inference API Token (for custom AI model)
+    HF_API_TOKEN=your_huggingface_api_token_here
+
+    # reCAPTCHA Secret Key (for backend verification)
+    RECAPTCHA_SECRET_KEY=your_recaptcha_secret_key_here
+
     # CSRF Settings for Local Admin Access (if needed)
     DJANGO_CSRF_COOKIE_SECURE=False
-    DJANGO_CSRF_TRUSTED_ORIGINS=http://localhost:8000,[http://127.0.0.1:8000](http://127.0.0.1:8000)
+    DJANGO_CSRF_TRUSTED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000
     ```
     * **`DJANGO_SECRET_KEY`**: Replace with a random string.
     * **`GEMINI_API_KEY`**: Obtain your API key from Google AI Studio.
+    * **`HF_API_TOKEN`**: Obtain your API token from Hugging Face for model inference.
+    * **`RECAPTCHA_SECRET_KEY`**: Obtain your reCAPTCHA secret key from Google reCAPTCHA Admin console.
 
 3.  **Create `.env.local` file for Frontend:**
     Create a file named `.env.local` inside the `frontend/` directory. **Add `/.env.local` to `frontend/.gitignore`.**
     ```
     VITE_APP_BACKEND_URL=http://web:8000
     VITE_APP_FRONTEND_HOSTS=localhost,127.0.0.1
+    VITE_RECAPTCHA_SITE_KEY=your_recaptcha_site_key_here
     ```
+    * **`VITE_RECAPTCHA_SITE_KEY`**: Obtain your reCAPTCHA site key from Google reCAPTCHA Admin console. This is a public key.
 
 4.  **Build and Run Docker Containers:**
     ```bash
@@ -111,11 +121,11 @@ This project is deployed on Render. The deployment process involves:
 
 * **Backend Service:** A Python web service running Django, connected to a Render PostgreSQL database and a **Persistent Disk** for media file storage.
 * **Frontend Service:** A Node.js web service running the React application.
-* **Custom Domains:** Configured to use `www.betancourtosmar.com` for the frontend and `api.betancourtosmar.com` for the backend. SSL certificates are automatically managed by Render.
+* **Custom Domains:** Configured to use `www.betancourtosmar.com` for the frontend. SSL certificates are automatically managed by Render.
 
 ## Content Management
 
-* Log in to the Django Admin at `https://api.betancourtosmar.com/admin/` using your superuser credentials to add, edit, or delete portfolio projects. Images uploaded here will be stored persistently.
+* Log in to the Django Admin at `http://localhost:8000/admin/` using your superuser credentials to add, edit, or delete portfolio projects. Images uploaded here will be stored persistently.
 
 ## Troubleshooting Local Development
 

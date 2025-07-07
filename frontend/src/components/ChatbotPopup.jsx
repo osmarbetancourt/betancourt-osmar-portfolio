@@ -87,8 +87,11 @@ export default function ChatbotPopup({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    // Fixed position for the popup, bottom-4 right-4 as per previous version
-    <div className="fixed bottom-4 right-4 z-50 w-full max-w-sm bg-white rounded-xl shadow-2xl flex flex-col h-[60vh] sm:h-[70vh] overflow-hidden border border-gray-200">
+    // MODIFIED: Adjusted positioning and sizing for better responsiveness on all screens
+    <div className="fixed inset-x-4 bottom-4 z-50 w-auto max-w-full
+                    sm:left-auto sm:right-4 sm:max-w-sm
+                    md:right-8 md:max-w-md
+                    bg-white rounded-xl shadow-2xl flex flex-col h-[70vh] max-h-[calc(100vh-2rem)] overflow-hidden border border-gray-200">
       {/* Chat Header */}
       <div className="p-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-center rounded-t-xl shadow-md flex justify-between items-center">
         <h1 className="text-xl font-bold font-inter">AI Chat Assistant</h1>
@@ -143,7 +146,7 @@ export default function ChatbotPopup({ isOpen, onClose }) {
       <div className="p-4 border-t border-gray-200 flex items-center bg-white rounded-b-xl">
         <textarea
           className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-inter text-gray-800 resize-none h-12 overflow-hidden"
-          placeholder={isSending ? "Sending..." : "Type your message..."}
+          placeholder={isSending ? "Sending..." : "Type your message...\""}
           value={inputMessage}
           onChange={(e) => setInputMessage(e.target.value)}
           onKeyPress={handleKeyPress}
