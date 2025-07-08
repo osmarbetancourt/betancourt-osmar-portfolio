@@ -17,7 +17,7 @@ export default function App() {
       title: "Datacamp Associate AI Engineer for Developers",
       issuer: "Datacamp",
       image: "https://placehold.co/600x400/007bff/ffffff?text=Datacamp+AI", // Generic placeholder
-      credential_url: "https://example.com/datacamp-ai-engineer", // Replace with actual link
+      credential_url: "https://www.datacamp.com/completed/statement-of-accomplishment/track/35cc78ab9b3b9491fd301dbea306346575e25122", // Updated link
       description: "Certifies foundational skills in AI engineering relevant for developers.",
     },
     {
@@ -25,7 +25,7 @@ export default function App() {
       title: "Datacamp Data Engineer in Python",
       issuer: "Datacamp",
       image: "https://placehold.co/600x400/28a745/ffffff?text=Datacamp+DE", // Generic placeholder
-      credential_url: "https://example.com/datacamp-data-engineer", // Replace with actual link
+      credential_url: "https://www.datacamp.com/completed/statement-of-accomplishment/track/656f65c649647a935728b7d6c449af77bf77c283", // Updated link
       description: "Demonstrates expertise in building and managing data pipelines using Python.",
     },
     {
@@ -33,7 +33,7 @@ export default function App() {
       title: "Datacamp Professional Data Engineer in Python",
       issuer: "Datacamp",
       image: "https://placehold.co/600x400/ffc107/000000?text=Datacamp+Pro+DE", // Generic placeholder
-      credential_url: "https://example.com/datacamp-pro-data-engineer", // Replace with actual link
+      credential_url: "https://www.datacamp.com/completed/statement-of-accomplishment/track/98fff659c6d42e3bd086bb484080a777ffc81205", // Updated link
       description: "Advanced certification in data engineering, focusing on production-ready systems and complex data challenges.",
     },
     {
@@ -41,7 +41,7 @@ export default function App() {
       title: "Datacamp Developing Large Language Models",
       issuer: "Datacamp",
       image: "https://placehold.co/600x400/6f42c1/ffffff?text=Datacamp+LLM", // Generic placeholder
-      credential_url: "https://example.com/datacamp-llm", // Replace with actual link
+      credential_url: "https://www.datacamp.com/completed/statement-of-accomplishment/track/8860025de09c0e1fb74ea5211f2d1f7ed5a6d299", // Replace with actual link
       description: "Covers the principles and practices of developing and deploying Large Language Models.",
     },
   ];
