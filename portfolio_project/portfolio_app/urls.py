@@ -3,7 +3,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 # MODIFIED: Import the new custom_ai_model_view
-from .views import ProjectViewSet, health_check, gemini_chat_view, custom_ai_model_view
+from .views import ProjectViewSet, health_check, gemini_chat_view, custom_ai_model_view, codellama_codegen_view, flux_image_view
 from django.views.decorators.csrf import csrf_exempt
 
 # Create a router and register our viewsets with it.
@@ -24,4 +24,10 @@ urlpatterns = [
     
     # API endpoint for the custom AI model. Will be /api/custom-ai-model/ due to project/urls.py prefix
     path('api/custom-ai-model/', csrf_exempt(custom_ai_model_view), name='custom_ai_model'), # CORRECTED: Removed 'api/' prefix here
+
+    # API endpoint for the DeepSeek CodeGen model. Will be /api/codegen/ due to project/urls.py prefix
+    path('api/codegen/', csrf_exempt(codellama_codegen_view), name='codellama_codegen'),
+
+    # API endpoint for the FLUX.1-dev image generation model. Will be /api/flux-image/
+    path('api/flux-image/', csrf_exempt(flux_image_view), name='flux_image'),
 ]

@@ -21,3 +21,21 @@ class Project(models.Model):
 
     def __str__(self):
         return self.title
+
+class ImageGenerationUsage(models.Model):
+    """
+    Tracks how many times a user (by Google user ID) has generated images in a given month/year.
+    """
+    google_user_id = models.CharField(max_length=128)
+    month = models.PositiveSmallIntegerField()
+    year = models.PositiveSmallIntegerField()
+    count = models.PositiveIntegerField(default=0)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("google_user_id", "month", "year")
+        verbose_name = "Image Generation Usage"
+        verbose_name_plural = "Image Generation Usages"
+
+    def __str__(self):
+        return f"{self.google_user_id} - {self.month}/{self.year}: {self.count}"

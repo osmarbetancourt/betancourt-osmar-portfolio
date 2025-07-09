@@ -1,12 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import ReactMarkdown from 'react-markdown'; // <--- NEW: Import ReactMarkdown
+import ReactMarkdown from 'react-markdown';
 
 // ChatbotPopup component for the interactive chat interface
 export default function ChatbotPopup({ isOpen, onClose }) {
-  const [messages, setMessages] = useState([]); // State to store chat messages
+  // Load messages from localStorage on mount
+  const [messages, setMessages] = useState(() => {
+    const saved = localStorage.getItem('chatbotMessages');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [inputMessage, setInputMessage] = useState(''); // State for the current input message
   const [isSending, setIsSending] = useState(false); // State to indicate if a message is being sent
   const messagesEndRef = useRef(null); // Ref for scrolling to the latest message
+
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('chatbotMessages', JSON.stringify(messages));
+  }, [messages]);
 
   // Scroll to bottom whenever messages update
   useEffect(() => {
@@ -20,9 +29,25 @@ export default function ChatbotPopup({ isOpen, onClose }) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Convert local messages to Gemini API format
+  const getGeminiMessages = () => {
+    return messages.map((msg) => {
+      return {
+        role: msg.sender === 'user' ? 'user' : 'model',
+        content: msg.text,
+      };
+    });
+  };
+
   // Function to call the Django backend API for chat
   const callBackendChatApi = async (userMessage) => {
     const apiUrl = '/api/chat/'; // Your new Django API endpoint for chat
+
+    // Prepare messages array for backend (including new user message)
+    const geminiMessages = [
+      ...getGeminiMessages(),
+      { role: 'user', content: userMessage }
+    ];
 
     try {
       const response = await fetch(apiUrl, {
@@ -30,7 +55,7 @@ export default function ChatbotPopup({ isOpen, onClose }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: userMessage }) // Send the user's message in the body
+        body: JSON.stringify({ messages: geminiMessages }) // Send the user's message in the body
       });
 
       if (!response.ok) {

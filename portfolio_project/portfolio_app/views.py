@@ -11,9 +11,16 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 import os
 from huggingface_hub import InferenceClient # Ensure this is imported
+import traceback
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
 
-from .models import Project
+from .models import Project, ImageGenerationUsage
 from .serializers import ProjectSerializer
+from .google_auth import verify_google_token
+from datetime import datetime
 
 class ProjectViewSet(viewsets.ModelViewSet):
     """
@@ -35,17 +42,18 @@ def health_check(request):
 @csrf_exempt
 def gemini_chat_view(request):
     """
-    Handles chat requests, sends messages to the Google Gemini API,
-    and returns the AI's response.
+    Handles chat requests, sends conversation history to the Google Gemini API,
+    and returns the AI's response. Now supports multi-turn (context-aware) conversations.
     """
     try:
         data = json.loads(request.body)
+        messages = data.get('messages')
         user_message = data.get('message')
     except json.JSONDecodeError:
         return Response({'error': 'Invalid JSON in request body'}, status=status.HTTP_400_BAD_REQUEST)
 
-    if not user_message:
-        return Response({'error': 'Message field is required'}, status=status.HTTP_400_BAD_REQUEST)
+    if not messages and not user_message:
+        return Response({'error': 'Either messages array or message field is required'}, status=status.HTTP_400_BAD_REQUEST)
 
     gemini_api_key = settings.GEMINI_API_KEY
     if not gemini_api_key:
@@ -58,16 +66,29 @@ def gemini_chat_view(request):
         ]
     }
 
+    # Build conversation history for Gemini API
+    contents = [system_instruction]
+    if messages and isinstance(messages, list):
+        # Convert each message to Gemini API format
+        for msg in messages:
+            role = msg.get('role')
+            text = msg.get('content') or msg.get('text')
+            if role and text:
+                contents.append({
+                    "role": role,
+                    "parts": [{"text": text}]
+                })
+    elif user_message:
+        # Fallback: single message
+        contents.append({
+            "role": "user",
+            "parts": [{"text": user_message}]
+        })
+    else:
+        return Response({'error': 'No valid messages provided'}, status=status.HTTP_400_BAD_REQUEST)
+
     payload = {
-        "contents": [
-            system_instruction,
-            {
-                "role": "user",
-                "parts": [
-                    {"text": user_message}
-                ]
-            }
-        ],
+        "contents": contents,
         "generationConfig": {
             "maxOutputTokens": 500,
             "temperature": 0.7,
@@ -75,20 +96,16 @@ def gemini_chat_view(request):
             "topK": 40,
         },
     }
-    
+
     gemini_api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={gemini_api_key}"
 
     try:
         response = requests.post(gemini_api_url, json=payload, timeout=30)
-        
         print(f"Gemini API Response Status Code: {response.status_code}")
         print(f"Gemini API Response Headers: {response.headers}")
         print(f"Gemini API Raw Response Text (first 500 chars): {response.text[:500]}...")
-
         response.raise_for_status()
-        
         gemini_result = response.json()
-
         if gemini_result and gemini_result.get('candidates') and len(gemini_result['candidates']) > 0 and \
            gemini_result['candidates'][0].get('content') and gemini_result['candidates'][0]['content'].get('parts') and \
            len(gemini_result['candidates'][0]['content']['parts']) > 0:
@@ -97,7 +114,6 @@ def gemini_chat_view(request):
         else:
             print("Unexpected Gemini API response structure:", gemini_result)
             return Response({'error': 'Unexpected response from AI model'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
     except requests.exceptions.RequestException as e:
         print(f"Error calling Gemini API: {e}")
         sanitized_error_message = str(e).replace(gemini_api_key, "[REDACTED_API_KEY]")
@@ -117,8 +133,17 @@ def gemini_chat_view(request):
 def custom_ai_model_view(request):
     """
     Generates text using a model hosted on Hugging Face Inference API
-    and verifies reCAPTCHA token.
+    and verifies Google ID token (and reCAPTCHA token).
     """
+    # --- Google ID Token Verification ---
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return Response({'error': 'Authorization header missing or invalid.'}, status=401)
+    google_token = auth_header.split(' ')[1]
+    user_info = verify_google_token(google_token)
+    if not user_info:
+        return Response({'error': 'Invalid or expired Google token.'}, status=401)
+
     try:
         data = json.loads(request.body)
         user_input = data.get('input')
@@ -153,7 +178,7 @@ def custom_ai_model_view(request):
         print(f"Received request for custom AI model with input: '{user_input}' (reCAPTCHA verified)")
 
         # Initialize InferenceClient inside the view to ensure settings are loaded
-        hf_model_id = "mistralai/Mistral-7B-Instruct-v0.2"
+        hf_model_id = "mistralai/Mistral-7B-Instruct-v0.3"
         hf_api_token = settings.HF_API_TOKEN
 
         try:
@@ -208,3 +233,198 @@ def custom_ai_model_view(request):
     except Exception as e:
         print(f"An unexpected error occurred in custom_ai_model_view: {e}")
         return Response({'error': 'An unexpected error occurred with the custom AI model'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@authentication_classes([])
+@csrf_exempt
+def codellama_codegen_view(request):
+    """
+    (reCAPTCHA temporarily disabled for development/testing)
+    """
+    # --- Google ID Token Verification ---
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return Response({'error': 'Authorization header missing or invalid.'}, status=401)
+    google_token = auth_header.split(' ')[1]
+    user_info = verify_google_token(google_token)
+    if not user_info:
+        return Response({'error': 'Invalid or expired Google token.'}, status=401)
+    # --- End Google ID Token Verification ---
+
+    try:
+        data = json.loads(request.body)
+        user_input = data.get('input')
+        # recaptcha_token = data.get('recaptcha_token')  # Ignored for now
+
+        # Trim whitespace and check for empty input
+        if user_input is not None:
+            user_input = user_input.strip()
+        if not user_input:
+            return Response({'error': 'Input field is required for code generation'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # --- reCAPTCHA Verification BYPASSED ---
+        # (No reCAPTCHA check during development)
+
+        print(f"Received request for CodeLlama-13b-Python-hf CodeGen with input: '{user_input}' (reCAPTCHA bypassed)")
+
+        # Initialize InferenceClient inside the view to ensure settings are loaded
+        hf_model_id = "mistralai/Mistral-7B-Instruct-v0.3"
+        hf_api_token = settings.HF_API_TOKEN
+
+        try:
+            inference_client = InferenceClient(model=hf_model_id, token=hf_api_token)
+        except Exception as e:
+            print(f"Error initializing Hugging Face InferenceClient: {e}")
+            return Response(
+                {"error": "Hugging Face Inference Client initialization failed. Check Django settings and environment variables."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        # Use chat_completion for Mistral-7B-Instruct-v0.3
+        messages = [{"role": "user", "content": user_input}]
+        generation_parameters = {
+            "max_tokens": 200,
+            "temperature": 0.7,
+            "top_p": 0.9,
+        }
+        try:
+            chat_completion_response = inference_client.chat_completion(
+                messages=messages,
+                **generation_parameters
+            )
+            generated_code = chat_completion_response.choices[0].message.content if chat_completion_response.choices else "No response generated."
+            print(f"Generated code from Mistral model: {generated_code}")
+            return Response({'response': generated_code, 'language': 'auto'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(f"Error during code generation: {e}")
+            return Response({'error': 'Failed to generate code from Mistral model.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    except requests.exceptions.HTTPError as e:
+        print(f"HTTP Error from Hugging Face Inference API: {getattr(e.response, 'status_code', 'N/A')} - {getattr(e.response, 'text', str(e))}")
+        try:
+            error_detail = e.response.json().get('error', e.response.text)
+        except Exception:
+            error_detail = str(e)
+        return Response(
+            {'error': f"Failed to get response from AI model (HF API error): {error_detail}"},
+            status=getattr(e.response, 'status_code', status.HTTP_500_INTERNAL_SERVER_ERROR)
+        )
+    except requests.exceptions.RequestException as e:
+        print(f"Network Error communicating with Hugging Face Inference API: {e}")
+        return Response(
+            {'error': f"Failed to connect to AI model (network error): {e}. Please check internet connection."},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON in request body or from AI model response: {e}")
+        return Response({'error': 'Invalid JSON in request body or unexpected AI model response format.'}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print(f"An unexpected error occurred in codellama_codegen_view: {e}")
+        return Response({'error': 'An unexpected error occurred with the CodeLlama CodeGen model'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@authentication_classes([])
+@csrf_exempt
+def flux_image_view(request):
+    """
+    Generates an image using black-forest-labs/FLUX.1-dev (text-to-image) via Hugging Face Inference API.
+    Accepts a prompt and returns the image URL or base64-encoded image.
+    """
+    # --- Google ID Token Verification ---
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return Response({'error': 'Authorization header missing or invalid.'}, status=401)
+    google_token = auth_header.split(' ')[1]
+    user_info = verify_google_token(google_token)
+    if not user_info:
+        return Response({'error': 'Invalid or expired Google token.'}, status=401)
+    google_user_id = user_info.get('sub')
+    if not google_user_id:
+        return Response({'error': 'Google user ID not found in token.'}, status=401)
+    # --- End Google ID Token Verification ---
+
+    # --- Monthly Usage Limit Check ---
+    now = datetime.utcnow()
+    month = now.month
+    year = now.year
+    usage, created = ImageGenerationUsage.objects.get_or_create(
+        google_user_id=google_user_id, month=month, year=year,
+        defaults={'count': 0}
+    )
+    if usage.count >= 2:
+        return Response({'error': 'Monthly image generation limit reached (2 per month).'}, status=403)
+    # Increment usage count
+    usage.count += 1
+    usage.save()
+    # --- End Usage Limit Check ---
+
+    try:
+        data = json.loads(request.body)
+        prompt = data.get('prompt')
+        if not prompt:
+            print("[flux_image_view] No prompt provided in request body.")
+            return Response({'error': 'Prompt is required for image generation.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        hf_model_id = "black-forest-labs/FLUX.1-dev"
+        hf_api_token = settings.HF_API_TOKEN
+        print(f"[flux_image_view] Received prompt: {prompt}")
+        print(f"[flux_image_view] Using model: {hf_model_id}")
+        print(f"[flux_image_view] HF_API_TOKEN present: {bool(hf_api_token)}")
+        try:
+            inference_client = InferenceClient(model=hf_model_id, token=hf_api_token)
+        except Exception as e:
+            import traceback
+            print(f"[flux_image_view] Error initializing Hugging Face InferenceClient: {e}")
+            print(traceback.format_exc())
+            return Response(
+                {"error": f"Hugging Face Inference Client initialization failed: {e}. Check Django settings and environment variables."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        # Call text_to_image
+        try:
+            image_response = inference_client.text_to_image(prompt=prompt)
+            print(f"[flux_image_view] image_response type: {type(image_response)}")
+            if isinstance(image_response, str):
+                print(f"[flux_image_view] image_response (str, first 200 chars): {image_response[:200]}")
+            elif isinstance(image_response, bytes):
+                print(f"[flux_image_view] image_response (bytes, length): {len(image_response)}")
+            else:
+                print(f"[flux_image_view] image_response (unexpected type): {repr(image_response)}")
+            # The response may be a URL, bytes, or PIL Image
+            if isinstance(image_response, str) and image_response.startswith('http'):
+                # URL to image
+                return Response({'image_url': image_response}, status=status.HTTP_200_OK)
+            elif isinstance(image_response, bytes):
+                # Return base64-encoded image
+                import base64
+                image_b64 = base64.b64encode(image_response).decode('utf-8')
+                return Response({'image_base64': image_b64}, status=status.HTTP_200_OK)
+            elif Image is not None and isinstance(image_response, Image.Image):
+                print("[flux_image_view] image_response is a PIL Image. Converting to PNG bytes.")
+                import io
+                buf = io.BytesIO()
+                try:
+                    image_response.save(buf, format='PNG')
+                    buf.seek(0)
+                    import base64
+                    image_b64 = base64.b64encode(buf.read()).decode('utf-8')
+                    return Response({'image_base64': image_b64}, status=status.HTTP_200_OK)
+                except Exception as pil_e:
+                    print(f"[flux_image_view] Error converting PIL Image to PNG: {pil_e}")
+                    print(traceback.format_exc())
+                    return Response({'error': 'Failed to convert PIL Image to PNG.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                print(f"[flux_image_view] Unexpected response from image model: {repr(image_response)}")
+                return Response({'error': 'Unexpected response from image model.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            print(f"[flux_image_view] Error during image generation: {e}")
+            print(traceback.format_exc())
+            return Response({'error': 'Failed to generate image from FLUX.1-dev model.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except json.JSONDecodeError:
+        return Response({'error': 'Invalid JSON in request body'}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print(f"An unexpected error occurred in flux_image_view: {e}")
+        return Response({'error': 'An unexpected error occurred with the image generation'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

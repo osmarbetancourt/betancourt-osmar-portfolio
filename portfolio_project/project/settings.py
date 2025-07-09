@@ -190,3 +190,5 @@ HF_API_TOKEN = os.getenv('HF_API_TOKEN') # Your Hugging Face API token (read acc
 # --- Google reCAPTCHA Settings (NEW) ---
 # Your reCAPTCHA Secret Key (obtained from Google reCAPTCHA Admin Console)
 RECAPTCHA_SECRET_KEY = os.getenv('RECAPTCHA_SECRET_KEY')
+
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)

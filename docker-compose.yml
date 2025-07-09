@@ -44,9 +44,6 @@ services:
     build:
       context: ./frontend # Build context is the frontend directory
       dockerfile: Dockerfile.frontend # Specify a separate Dockerfile for frontend
-    volumes:
-      - ./frontend:/app # Mount the frontend directory into the container's /app
-      - /app/node_modules # Anonymous volume to prevent host node_modules from overwriting container's
     ports:
       - "5173:5173" # Vite's default port
     depends_on:
