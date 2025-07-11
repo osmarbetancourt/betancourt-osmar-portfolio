@@ -18,10 +18,21 @@ try:
 except ImportError:
     Image = None
 
+
 from .models import Project, ImageGenerationUsage, Conversation, Message
 from .serializers import ProjectSerializer
 from .google_auth import verify_google_token
 from datetime import datetime
+
+# Import RAG pipeline functions
+from .rag_pipeline import (
+    embed_text,
+    query_pinecone,
+    build_augmented_prompt,
+    call_codegen_llm,
+    trim_conversation_history_to_fit_tokens,
+)
+
 
 class ProjectViewSet(viewsets.ModelViewSet):
     """
@@ -241,7 +252,8 @@ def custom_ai_model_view(request):
 @csrf_exempt
 def codellama_codegen_view(request):
     """
-    (reCAPTCHA temporarily disabled for development/testing)
+    Retrieval-Augmented Generation (RAG) codegen endpoint using Pinecone and LLM inference.
+    Accepts user input and optional conversation history, returns generated code/response and retrieved context.
     """
     # --- Google ID Token Verification ---
     auth_header = request.headers.get('Authorization')
@@ -251,77 +263,112 @@ def codellama_codegen_view(request):
     user_info = verify_google_token(google_token)
     if not user_info:
         return Response({'error': 'Invalid or expired Google token.'}, status=401)
-    # --- End Google ID Token Verification ---
+
+    try:
+        from .rag_pipeline import extract_urls, is_url_safe, fetch_and_clean_url_content
+    except ImportError as e:
+        print(f"[codellama_codegen_view] Import error: {e}")
+        return Response({'error': 'Failed to import RAG pipeline URL utilities.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     try:
         data = json.loads(request.body)
         user_input = data.get('input')
-        # recaptcha_token = data.get('recaptcha_token')  # Ignored for now
-
-        # Trim whitespace and check for empty input
+        conversation_history = data.get('history', [])  # List of {role, content}
         if user_input is not None:
             user_input = user_input.strip()
         if not user_input:
             return Response({'error': 'Input field is required for code generation'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # --- reCAPTCHA Verification BYPASSED ---
-        # (No reCAPTCHA check during development)
-
-        print(f"Received request for CodeLlama-13b-Python-hf CodeGen with input: '{user_input}' (reCAPTCHA bypassed)")
-
-        # Initialize InferenceClient inside the view to ensure settings are loaded
-        hf_model_id = "mistralai/Mistral-7B-Instruct-v0.3"
-        hf_api_token = settings.HF_API_TOKEN
-
+        # --- URL Extraction and Content Fetching ---
+        url_context_chunks = []
         try:
-            inference_client = InferenceClient(model=hf_model_id, token=hf_api_token)
-        except Exception as e:
-            print(f"Error initializing Hugging Face InferenceClient: {e}")
-            return Response(
-                {"error": "Hugging Face Inference Client initialization failed. Check Django settings and environment variables."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            urls = extract_urls(user_input)
+            print(f"[codellama_codegen_view] Extracted URLs: {urls}")
+            for url in urls:
+                try:
+                    if is_url_safe(url):
+                        content = fetch_and_clean_url_content(url)
+                        if content:
+                            url_context_chunks.append({'text': f"[From URL {url}]:\n{content}"})
+                        else:
+                            print(f"[codellama_codegen_view] No content fetched for URL: {url}")
+                    else:
+                        print(f"[codellama_codegen_view] Unsafe URL skipped: {url}")
+                except Exception as url_e:
+                    print(f"[codellama_codegen_view] Error processing URL {url}: {url_e}")
+        except Exception as url_block_e:
+            print(f"[codellama_codegen_view] Error in URL extraction/fetch: {url_block_e}")
+
+        # Step 1: Embed user input
+        try:
+            embedding = embed_text(user_input)
+        except Exception as embed_e:
+            print(f"[codellama_codegen_view] Embedding error: {embed_e}")
+            return Response({'error': 'Failed to embed user input.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # Step 2: Retrieve relevant context from Pinecone
+        try:
+            retrieved_chunks = query_pinecone(embedding, top_k=3)
+        except Exception as pinecone_e:
+            print(f"[codellama_codegen_view] Pinecone retrieval error: {pinecone_e}")
+            retrieved_chunks = []
+
+        # Step 3: Combine context (Pinecone + URL content)
+        all_context_chunks = retrieved_chunks + url_context_chunks
+
+        # Step 4: Trim conversation history to fit model token limit
+        try:
+            trimmed_history = trim_conversation_history_to_fit_tokens(
+                conversation_history, all_context_chunks, user_input
             )
+        except Exception as trim_e:
+            print(f"[codellama_codegen_view] History trimming error: {trim_e}")
+            trimmed_history = conversation_history
 
-        # Use chat_completion for Mistral-7B-Instruct-v0.3
-        messages = [{"role": "user", "content": user_input}]
-        generation_parameters = {
-            "max_tokens": 200,
-            "temperature": 0.7,
-            "top_p": 0.9,
-        }
+        # Step 5: Build prompt
         try:
-            chat_completion_response = inference_client.chat_completion(
-                messages=messages,
-                **generation_parameters
-            )
-            generated_code = chat_completion_response.choices[0].message.content if chat_completion_response.choices else "No response generated."
-            print(f"Generated code from Mistral model: {generated_code}")
-            return Response({'response': generated_code, 'language': 'auto'}, status=status.HTTP_200_OK)
-        except Exception as e:
-            print(f"Error during code generation: {e}")
-            return Response({'error': 'Failed to generate code from Mistral model.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            prompt = build_augmented_prompt(trimmed_history, all_context_chunks, user_input)
+        except Exception as prompt_e:
+            print(f"[codellama_codegen_view] Prompt build error: {prompt_e}")
+            return Response({'error': 'Failed to build prompt.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    except requests.exceptions.HTTPError as e:
-        print(f"HTTP Error from Hugging Face Inference API: {getattr(e.response, 'status_code', 'N/A')} - {getattr(e.response, 'text', str(e))}")
+        # Step 6: Call LLM
         try:
-            error_detail = e.response.json().get('error', e.response.text)
-        except Exception:
-            error_detail = str(e)
-        return Response(
-            {'error': f"Failed to get response from AI model (HF API error): {error_detail}"},
-            status=getattr(e.response, 'status_code', status.HTTP_500_INTERNAL_SERVER_ERROR)
-        )
-    except requests.exceptions.RequestException as e:
-        print(f"Network Error communicating with Hugging Face Inference API: {e}")
-        return Response(
-            {'error': f"Failed to connect to AI model (network error): {e}. Please check internet connection."},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
-    except json.JSONDecodeError as e:
-        print(f"Error decoding JSON in request body or from AI model response: {e}")
-        return Response({'error': 'Invalid JSON in request body or unexpected AI model response format.'}, status=status.HTTP_400_BAD_REQUEST)
+            generated_code = call_codegen_llm(prompt)
+        except Exception as llm_e:
+            print(f"[codellama_codegen_view] LLM call error: {llm_e}")
+            return Response({'error': 'Failed to generate code from LLM.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # --- Post-processing: enforce strict output if context is missing/irrelevant ---
+        context_is_empty = False
+        # Check if all context chunks are empty or only contain placeholders
+        if not all_context_chunks or all(
+            not chunk['text'].strip() or '[No relevant context found]' in chunk['text'] for chunk in all_context_chunks
+        ):
+            context_is_empty = True
+
+        # If context is empty or only placeholder, do not override LLM output anymore
+        # Only filter LLM commentary regardless of context
+        for marker in [
+            'Here is the text that was used for the response:',
+            'Based on the provided information,',
+            'According to the context,',
+            'From the context,',
+            'Based on the context,',
+        ]:
+            if marker in generated_code:
+                generated_code = generated_code.split(marker, 1)[-1].strip()
+
+        return Response({
+            'response': generated_code,
+            'retrieved_context': [chunk['text'] for chunk in all_context_chunks],
+            'language': 'auto',
+        }, status=status.HTTP_200_OK)
+
     except Exception as e:
-        print(f"An unexpected error occurred in codellama_codegen_view: {e}")
+        print(f"[codellama_codegen_view] Unexpected error: {e}")
+        import traceback
+        traceback.print_exc()
         return Response({'error': 'An unexpected error occurred with the CodeLlama CodeGen model'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])

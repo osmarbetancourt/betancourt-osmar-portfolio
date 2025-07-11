@@ -196,3 +196,5 @@ GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
 # --- Pinecone Settings ---
 PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY", None)
 PINECONE_HOST = os.environ.get("PINECONE_HOST", None)
+
+GOOGLE_SAFE_BROWSING_API_KEY = os.getenv('GOOGLE_SAFE_BROWSING_API_KEY')
