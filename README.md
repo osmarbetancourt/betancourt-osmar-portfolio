@@ -1,3 +1,8 @@
+![License](https://img.shields.io/github/license/osmarbetancourt/betancourt-osmar-portfolio)
+![Last Commit](https://img.shields.io/github/last-commit/osmarbetancourt/betancourt-osmar-portfolio)
+![Python](https://img.shields.io/badge/python-3.10+-blue)
+![React](https://img.shields.io/badge/React-18+-blue)
+
 # Betancourt Osmar Portfolio
 
 This repository hosts the source code for Osmar Betancourt's personal portfolio website. It showcases my projects, experience, certifications, and now features advanced AI-powered tools for text, code, and image generation.
