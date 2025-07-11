@@ -39,3 +39,38 @@ class ImageGenerationUsage(models.Model):
 
     def __str__(self):
         return f"{self.google_user_id} - {self.month}/{self.year}: {self.count}"
+
+class Conversation(models.Model):
+    """
+    Represents a chat session for a user (can be ongoing or per topic).
+    """
+    google_user_id = models.CharField(max_length=128)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    title = models.CharField(max_length=255, blank=True, null=True, help_text="Optional title or topic for the conversation")
+
+    class Meta:
+        ordering = ['-updated_at']
+        verbose_name = "Conversation"
+        verbose_name_plural = "Conversations"
+
+    def __str__(self):
+        return f"Conversation {self.id} ({self.google_user_id})"
+
+class Message(models.Model):
+    """
+    Represents a single message in a conversation (user or assistant).
+    """
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
+    sender = models.CharField(max_length=16, choices=[('user', 'User'), ('assistant', 'Assistant')])
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    token_count = models.PositiveIntegerField(default=0, help_text="Optional: store token count for cost tracking")
+
+    class Meta:
+        ordering = ['created_at']
+        verbose_name = "Message"
+        verbose_name_plural = "Messages"
+
+    def __str__(self):
+        return f"{self.sender} ({self.created_at}): {self.content[:40]}..."
