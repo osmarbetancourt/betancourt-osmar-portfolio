@@ -3,7 +3,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 # MODIFIED: Import the new custom_ai_model_view
-from .views import ProjectViewSet, health_check, gemini_chat_view, custom_ai_model_view, codellama_codegen_view, flux_image_view
+from .views import ProjectViewSet, health_check, gemini_chat_view, custom_ai_model_view, codellama_codegen_view, flux_image_view, conversation_history_view, conversation_list_view, conversation_delete_view
 from django.views.decorators.csrf import csrf_exempt
 
 # Create a router and register our viewsets with it.
@@ -30,4 +30,13 @@ urlpatterns = [
 
     # API endpoint for the FLUX.1-dev image generation model. Will be /api/flux-image/
     path('api/flux-image/', csrf_exempt(flux_image_view), name='flux_image'),
+
+    # API endpoint for fetching conversation history (protected)
+    path('api/conversation/<int:conversation_id>/history/', conversation_history_view, name='conversation_history'),
+
+    # API endpoint for listing all conversations for the authenticated user
+    path('api/conversation/list/', conversation_list_view, name='conversation_list'),
+
+    # API endpoint for deleting a conversation (protected)
+    path('api/conversation/<int:conversation_id>/', conversation_delete_view, name='conversation_delete'),
 ]

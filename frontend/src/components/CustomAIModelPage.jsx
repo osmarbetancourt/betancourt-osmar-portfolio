@@ -18,21 +18,22 @@ function isTokenExpired(token) {
   }
 }
 
+
 export default function CustomAIModelPage() {
-  const [activeModel, setActiveModel] = useState('mistral'); // Default to Mistral
-  const [messages, setMessages] = useState([]); // State to store chat messages
-  const [inputMessage, setInputMessage] = useState(''); // State for the current input message
-  const [isSending, setIsSending] = useState(false); // State to indicate if a message is being sent
-  const [recaptchaToken, setRecaptchaToken] = useState(null); // State to store the reCAPTCHA token
-  const [recaptchaError, setRecaptchaError] = useState(null); // State to store reCAPTCHA errors
-  const [codeInput, setCodeInput] = useState(""); // State for code input
-  const [codeResult, setCodeResult] = useState(""); // State for code generation result
-  const [isCodeLoading, setIsCodeLoading] = useState(false); // State to indicate if code is being generated
-  const [codeError, setCodeError] = useState(null); // State to store code generation errors
-  const [imagePrompt, setImagePrompt] = useState(""); // State for image prompt
-  const [imageResult, setImageResult] = useState(null); // { image_url, image_base64 }
-  const [isImageLoading, setIsImageLoading] = useState(false); // State to indicate if image is being generated
-  const [imageError, setImageError] = useState(null); // State to store image generation errors
+  const [activeModel, setActiveModel] = useState('mistral');
+  const [messages, setMessages] = useState([]);
+  const [inputMessage, setInputMessage] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
+  const [recaptchaError, setRecaptchaError] = useState(null);
+  const [codeInput, setCodeInput] = useState("");
+  const [codeResult, setCodeResult] = useState("");
+  const [isCodeLoading, setIsCodeLoading] = useState(false);
+  const [codeError, setCodeError] = useState(null);
+  const [imagePrompt, setImagePrompt] = useState("");
+  const [imageResult, setImageResult] = useState(null);
+  const [isImageLoading, setIsImageLoading] = useState(false);
+  const [imageError, setImageError] = useState(null);
   const [googleToken, setGoogleToken] = useState(() => {
     const token = localStorage.getItem('google_id_token');
     if (token && !isTokenExpired(token)) {
@@ -42,11 +43,84 @@ export default function CustomAIModelPage() {
       return null;
     }
   });
-  const messagesEndRef = useRef(null); // Ref for scrolling to the latest message
-  const codeMessagesEndRef = useRef(null); // Ref for scrolling to the latest code message
+  const messagesEndRef = useRef(null);
+  const codeMessagesEndRef = useRef(null);
+
+  // --- Conversation List State ---
+  const [conversations, setConversations] = useState([]); // [{id, created_at, ...}]
+  const [isConvLoading, setIsConvLoading] = useState(false);
+  const [convError, setConvError] = useState(null);
+  const [showConvList, setShowConvList] = useState(false);
 
   // --- Conversational Codegen State ---
-  const [codeMessages, setCodeMessages] = useState([]); // [{sender: 'user'|'ai', text: string}]
+  const [codeMessages, setCodeMessages] = useState([]);
+  const [conversationId, setConversationId] = useState(() => {
+    const stored = localStorage.getItem('codegen_conversation_id');
+    return stored ? parseInt(stored, 10) : null;
+  });
+
+  // Fetch all conversations for the user (codegen only)
+  useEffect(() => {
+    if (activeModel !== 'code' || !googleToken) return;
+    const fetchConvs = async () => {
+      setIsConvLoading(true);
+      setConvError(null);
+      try {
+        const res = await fetch('/api/conversation/list/', {
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${googleToken}` },
+        });
+        if (!res.ok) throw new Error('Failed to fetch conversations.');
+        const data = await res.json();
+        setConversations(Array.isArray(data.conversations) ? data.conversations : []);
+      } catch (err) {
+        setConvError(err.message);
+        setConversations([]);
+      } finally {
+        setIsConvLoading(false);
+      }
+    };
+    fetchConvs();
+  }, [activeModel, googleToken, conversationId]);
+
+  // Auto-load last codegen conversation history on mount or when conversationId changes
+  useEffect(() => {
+    const fetchHistory = async () => {
+      if (!conversationId || !googleToken) return;
+      try {
+        const res = await fetch(`/api/conversation/${conversationId}/history/`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${googleToken}`,
+          },
+        });
+        if (res.status === 404) {
+          setCodeError('This conversation no longer exists.');
+          setConversationId(null);
+          localStorage.removeItem('codegen_conversation_id');
+          setCodeMessages([]);
+          return;
+        }
+        if (!res.ok) throw new Error('Failed to fetch conversation history.');
+        const data = await res.json();
+        if (data && Array.isArray(data.history)) {
+          const mapped = data.history.map(msg => ({
+            sender: msg.role === 'assistant' ? 'ai' : 'user',
+            text: msg.content,
+          }));
+          setCodeMessages(mapped);
+        }
+      } catch (err) {
+        setCodeError('Failed to load conversation history.');
+        setConversationId(null);
+        localStorage.removeItem('codegen_conversation_id');
+        setCodeMessages([]);
+      }
+    };
+    if (activeModel === 'code') {
+      fetchHistory();
+    }
+  }, [activeModel, conversationId, googleToken]);
 
   // Utility to get a valid Google token or clear it if expired
   const getValidGoogleToken = () => {
@@ -200,6 +274,11 @@ export default function CustomAIModelPage() {
       const aiMsg = { sender: 'ai', text: data.response || "No code generated." };
       setCodeMessages((prev) => [...prev, aiMsg]);
       setCodeResult(data.response || "No code generated.");
+      // Store conversation_id if present
+      if (data.conversation_id) {
+        setConversationId(data.conversation_id);
+        localStorage.setItem('codegen_conversation_id', data.conversation_id);
+      }
     } catch (err) {
       setCodeError(err.message);
       setCodeMessages((prev) => [...prev, { sender: 'ai', text: `Error: ${err.message}` }]);
@@ -229,6 +308,34 @@ export default function CustomAIModelPage() {
     setCodeInput("");
     setCodeResult("");
     setCodeError(null);
+    setConversationId(null);
+    localStorage.removeItem('codegen_conversation_id');
+  };
+
+  // --- Conversation List Handlers ---
+  const handleSelectConversation = async (convId) => {
+    setConversationId(convId);
+    localStorage.setItem('codegen_conversation_id', convId);
+    setShowConvList(false);
+  };
+
+  const handleDeleteConversation = async (convId) => {
+    if (!window.confirm('Delete this conversation? This cannot be undone.')) return;
+    try {
+      const res = await fetch(`/api/conversation/${convId}/`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${googleToken}` },
+      });
+      if (!res.ok) throw new Error('Failed to delete conversation.');
+      // If deleted current conversation, clear it
+      if (convId === conversationId) {
+        handleClearCodeChat();
+      }
+      // Refresh conversation list
+      setConversations(conversations => conversations.filter(c => c.id !== convId));
+    } catch (err) {
+      alert('Error deleting conversation: ' + err.message);
+    }
   };
 
   // --- Image Generation Handlers ---
@@ -369,7 +476,54 @@ export default function CustomAIModelPage() {
         );
       case 'code':
         return (
-          <div className="w-full max-w-3xl bg-zinc-900 rounded-xl shadow-lg flex flex-col h-[70vh] overflow-hidden border border-zinc-800 mt-8">
+          <div className="w-full max-w-3xl bg-zinc-900 rounded-xl shadow-lg flex flex-col h-[70vh] overflow-hidden border border-zinc-800 mt-8 relative">
+            {/* Conversation List Button */}
+            <button
+              className="absolute left-4 top-4 z-20 px-3 py-1 bg-zinc-800 text-gray-300 border border-zinc-700 rounded hover:bg-zinc-700 text-sm font-bold"
+              onClick={() => setShowConvList(v => !v)}
+              title="Show all conversations"
+            >
+              {showConvList ? 'Hide' : 'Conversations'}
+            </button>
+            {/* Conversation List Sidebar/Modal */}
+            {showConvList && (
+              <div className="absolute left-0 top-0 h-full w-72 bg-zinc-950 border-r border-zinc-800 shadow-xl z-30 flex flex-col">
+                <div className="flex items-center justify-between p-4 border-b border-zinc-800">
+                  <span className="font-bold text-lg text-white">Conversations</span>
+                  <button className="text-gray-400 hover:text-red-400" onClick={() => setShowConvList(false)} title="Close">&times;</button>
+                </div>
+                <div className="flex-1 overflow-y-auto">
+                  {isConvLoading ? (
+                    <div className="p-4 text-gray-400">Loading...</div>
+                  ) : convError ? (
+                    <div className="p-4 text-red-400">{convError}</div>
+                  ) : conversations.length === 0 ? (
+                    <div className="p-4 text-gray-400">No conversations found.</div>
+                  ) : (
+                    <ul className="divide-y divide-zinc-800">
+                      {conversations.map(conv => (
+                        <li key={conv.id} className={`flex items-center justify-between px-4 py-3 hover:bg-zinc-900 ${conv.id === conversationId ? 'bg-zinc-800' : ''}`}>
+                          <button
+                            className="flex-1 text-left text-gray-200 hover:text-purple-400 font-inter truncate"
+                            onClick={() => handleSelectConversation(conv.id)}
+                            title={`Started: ${conv.created_at}`}
+                          >
+                            Conversation #{conv.id}
+                          </button>
+                          <button
+                            className="ml-2 px-2 py-1 text-xs rounded bg-zinc-700 text-gray-300 hover:bg-red-600 hover:text-white border border-zinc-600"
+                            onClick={() => handleDeleteConversation(conv.id)}
+                            title="Delete conversation"
+                          >
+                            Delete
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            )}
             <div className="p-4 bg-zinc-800 text-gray-100 text-center rounded-t-xl shadow-md border-b border-zinc-700 flex justify-between items-center">
               <h1 className="text-2xl font-bold font-inter">Code Generation (Conversational)</h1>
               <button

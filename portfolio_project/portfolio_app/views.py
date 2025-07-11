@@ -1,5 +1,4 @@
-# portfolio_project/portfolio_app/views.py
-
+from rest_framework.decorators import api_view
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny
@@ -33,6 +32,118 @@ from .rag_pipeline import (
     trim_conversation_history_to_fit_tokens,
 )
 
+@api_view(['DELETE'])
+@permission_classes([AllowAny])
+@authentication_classes([])
+def conversation_delete_view(request, conversation_id):
+    """
+    Deletes a conversation by ID if the authenticated user owns it.
+    Requires Google ID token in Authorization header.
+    """
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return Response({'error': 'Authorization header missing or invalid.'}, status=401)
+    google_token = auth_header.split(' ')[1]
+    user_info = verify_google_token(google_token)
+    if not user_info:
+        return Response({'error': 'Invalid or expired Google token.'}, status=401)
+    google_user_id = user_info.get('sub')
+    if not google_user_id:
+        return Response({'error': 'Google user ID not found in token.'}, status=401)
+    print(f"[conversation_delete_view][DEBUG] google_user_id from token: {google_user_id}")
+
+    try:
+        conversation = Conversation.objects.filter(id=conversation_id).first()
+        if not conversation:
+            return Response({'error': 'Conversation not found.'}, status=404)
+        print(f"[conversation_delete_view][DEBUG] conversation.google_user_id: {conversation.google_user_id}")
+        if conversation.google_user_id != google_user_id:
+            print(f"[conversation_delete_view][DEBUG] Forbidden: token user_id {google_user_id} != conversation user_id {conversation.google_user_id}")
+            return Response({'error': 'You do not have permission to delete this conversation.'}, status=403)
+        conversation.delete()
+        print(f"[conversation_delete_view][DEBUG] Conversation {conversation_id} deleted by user {google_user_id}")
+        return Response({'success': True}, status=200)
+    except Exception as e:
+        print(f"[conversation_delete_view] Error: {e}")
+        return Response({'error': 'Failed to delete conversation.'}, status=500)
+
+
+@api_view(['GET'])
+@authentication_classes([])
+def conversation_history_view(request, conversation_id):
+    """
+    Returns the full message history for a given conversation ID, only if the authenticated user owns it.
+    Requires Google ID token in Authorization header.
+    """
+    # --- Google ID Token Verification ---
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return Response({'error': 'Authorization header missing or invalid.'}, status=401)
+    google_token = auth_header.split(' ')[1]
+    user_info = verify_google_token(google_token)
+    if not user_info:
+        return Response({'error': 'Invalid or expired Google token.'}, status=401)
+    google_user_id = user_info.get('sub')
+    if not google_user_id:
+        return Response({'error': 'Google user ID not found in token.'}, status=401)
+
+    try:
+        conversation = Conversation.objects.filter(id=conversation_id).first()
+        if not conversation:
+            return Response({'error': 'Conversation not found.'}, status=404)
+        if conversation.google_user_id != google_user_id:
+            return Response({'error': 'You do not have permission to access this conversation.'}, status=403)
+        messages = conversation.messages.order_by('created_at')
+        history = [
+            {
+                'role': msg.sender,
+                'content': msg.content,
+                'created_at': msg.created_at,
+            }
+            for msg in messages
+        ]
+        return Response({
+            'conversation_id': conversation.id,
+            'google_user_id': conversation.google_user_id,
+            'title': conversation.title,
+            'history': history,
+        }, status=200)
+    except Exception as e:
+        print(f"[conversation_history_view] Error: {e}")
+        return Response({'error': 'Failed to fetch conversation history.'}, status=500)
+
+@api_view(['GET'])
+@authentication_classes([])
+def conversation_list_view(request):
+    """
+    Returns a list of all conversations for the authenticated user, with id, title, and updated_at.
+    Requires Google ID token in Authorization header.
+    """
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return Response({'error': 'Authorization header missing or invalid.'}, status=401)
+    google_token = auth_header.split(' ')[1]
+    user_info = verify_google_token(google_token)
+    if not user_info:
+        return Response({'error': 'Invalid or expired Google token.'}, status=401)
+    google_user_id = user_info.get('sub')
+    if not google_user_id:
+        return Response({'error': 'Google user ID not found in token.'}, status=401)
+
+    try:
+        conversations = Conversation.objects.filter(google_user_id=google_user_id).order_by('-updated_at')
+        result = [
+            {
+                'id': conv.id,
+                'title': conv.title,
+                'updated_at': conv.updated_at,
+            }
+            for conv in conversations
+        ]
+        return Response({'conversations': result}, status=200)
+    except Exception as e:
+        print(f"[conversation_list_view] Error: {e}")
+        return Response({'error': 'Failed to fetch conversation list.'}, status=500)
 
 class ProjectViewSet(viewsets.ModelViewSet):
     """
@@ -271,13 +382,38 @@ def codellama_codegen_view(request):
         return Response({'error': 'Failed to import RAG pipeline URL utilities.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     try:
+
         data = json.loads(request.body)
         user_input = data.get('input')
-        conversation_history = data.get('history', [])  # List of {role, content}
         if user_input is not None:
             user_input = user_input.strip()
         if not user_input:
             return Response({'error': 'Input field is required for code generation'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # --- Conversation History from DB ---
+        conversation_history = []
+        google_user_id = user_info.get('sub')
+        conversation = None
+        if google_user_id:
+            from django.utils import timezone
+            from datetime import timedelta
+            now = timezone.now()
+            twelve_hours_ago = now - timedelta(hours=12)
+            conversation = Conversation.objects.filter(
+                google_user_id=google_user_id,
+                updated_at__gte=twelve_hours_ago
+            ).order_by('-updated_at').first()
+            if conversation:
+                # Build conversation history from all messages in this conversation
+                messages = conversation.messages.order_by('created_at')
+                for msg in messages:
+                    conversation_history.append({
+                        'role': msg.sender,
+                        'content': msg.content,
+                    })
+        # If no conversation found, fallback to request's history field (if present)
+        if not conversation_history:
+            conversation_history = data.get('history', []) or []
 
         # --- URL Extraction and Content Fetching ---
         url_context_chunks = []
@@ -316,6 +452,8 @@ def codellama_codegen_view(request):
         # Step 3: Combine context (Pinecone + URL content)
         all_context_chunks = retrieved_chunks + url_context_chunks
 
+
+
         # Step 4: Trim conversation history to fit model token limit
         try:
             trimmed_history = trim_conversation_history_to_fit_tokens(
@@ -339,16 +477,10 @@ def codellama_codegen_view(request):
             print(f"[codellama_codegen_view] LLM call error: {llm_e}")
             return Response({'error': 'Failed to generate code from LLM.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        # --- Post-processing: enforce strict output if context is missing/irrelevant ---
-        context_is_empty = False
-        # Check if all context chunks are empty or only contain placeholders
-        if not all_context_chunks or all(
-            not chunk['text'].strip() or '[No relevant context found]' in chunk['text'] for chunk in all_context_chunks
-        ):
-            context_is_empty = True
-
-        # If context is empty or only placeholder, do not override LLM output anymore
-        # Only filter LLM commentary regardless of context
+        # --- Post-processing: enforce strict output and language fallback ---
+        from .rag_pipeline import enforce_rag_fallback
+        filtered_code = enforce_rag_fallback(generated_code, all_context_chunks, user_input)
+        # Optionally, filter out LLM commentary markers (legacy)
         for marker in [
             'Here is the text that was used for the response:',
             'Based on the provided information,',
@@ -356,14 +488,51 @@ def codellama_codegen_view(request):
             'From the context,',
             'Based on the context,',
         ]:
-            if marker in generated_code:
-                generated_code = generated_code.split(marker, 1)[-1].strip()
+            if marker in filtered_code:
+                filtered_code = filtered_code.split(marker, 1)[-1].strip()
 
-        return Response({
-            'response': generated_code,
+        # --- Conversation Storage ---
+        try:
+            google_user_id = user_info.get('sub')
+            if google_user_id:
+                # Find the most recent conversation updated in the last 12 hours, or create new
+                from django.utils import timezone
+                from datetime import timedelta
+                now = timezone.now()
+                twelve_hours_ago = now - timedelta(hours=12)
+                conversation = Conversation.objects.filter(
+                    google_user_id=google_user_id,
+                    updated_at__gte=twelve_hours_ago
+                ).order_by('-updated_at').first()
+                if not conversation:
+                    conversation = Conversation.objects.create(google_user_id=google_user_id)
+                # Save user message
+                Message.objects.create(
+                    conversation=conversation,
+                    sender='user',
+                    content=user_input,
+                )
+                # Save assistant message
+                Message.objects.create(
+                    conversation=conversation,
+                    sender='assistant',
+                    content=filtered_code,
+                )
+                # Update conversation timestamp
+                conversation.updated_at = timezone.now()
+                conversation.save(update_fields=['updated_at'])
+        except Exception as db_exc:
+            print(f"[codellama_codegen_view] Warning: Failed to store conversation/message: {db_exc}")
+
+        response_payload = {
+            'response': filtered_code,
             'retrieved_context': [chunk['text'] for chunk in all_context_chunks],
             'language': 'auto',
-        }, status=status.HTTP_200_OK)
+        }
+        # Add conversation_id if available
+        if conversation:
+            response_payload['conversation_id'] = conversation.id
+        return Response(response_payload, status=status.HTTP_200_OK)
 
     except Exception as e:
         print(f"[codellama_codegen_view] Unexpected error: {e}")
