@@ -1,12 +1,13 @@
 # Betancourt Osmar Portfolio
 
-This repository hosts the source code for Osmar Betancourt's personal portfolio website. It showcases my projects, experience, and certifications, along with an interactive AI chatbot.
+This repository hosts the source code for Osmar Betancourt's personal portfolio website. It showcases my projects, experience, certifications, and now features advanced AI-powered tools for text, code, and image generation.
 
 ## Table of Contents
 
 * [Live Deployment](#live-deployment)
 * [Architecture](#architecture)
 * [Features](#features)
+* [Environment Variables](#environment-variables)
 * [Getting Started (Local Development)](#getting-started-local-development)
 * [Deployment](#deployment)
 * [Content Management](#content-management)
@@ -28,12 +29,15 @@ This application is fully deployed and accessible online:
 The project follows a modern decoupled architecture:
 
 * **Frontend:** A dynamic Single Page Application (SPA) built with **React** and **Vite**, styled with **Tailwind CSS**. It consumes data from the backend API.
-* **Backend:** A robust API built with **Django** and **Django REST Framework (DRF)**. It manages project data, handles user-uploaded media files, and integrates with the Google Gemini AI.
+* **Backend:** A robust API built with **Django** and **Django REST Framework (DRF)**. It manages project data, handles user-uploaded media files, and integrates with multiple AI models.
 * **Database:** **PostgreSQL** for persistent data storage.
 * **Persistent Storage:** User-uploaded media files (like project images) are stored on a **Render Persistent Disk** for durability.
 * **Containerization:** Both frontend and backend services are containerized using **Docker** and orchestrated locally with **Docker Compose**.
 * **Deployment:** All services are deployed on **Render**, leveraging its capabilities for web services, databases, and persistent disks.
-* **AI Integration:** Features an interactive **AI Chatbot** powered by the **Google Gemini API** for dynamic interactions, and also integrates with the **Mistral-7B-Instruct-v0.2** model for a custom AI chat experience.
+* **AI Integration:**
+  * **Text & Code Chatbot:** Powered by **Mistral-7B-Instruct-v0.3** and **Google Gemini API** for dynamic text and code generation.
+  * **Image Generation:** Generate images from text prompts using generative AI models.
+  * **Custom AI Models:** Integrates with Hugging Face for fine-tuned models and custom codegen.
 
 ## Features
 
@@ -41,8 +45,53 @@ The project follows a modern decoupled architecture:
 * **Project Showcase:** Dynamically loads and displays portfolio projects with images, descriptions, and links.
 * **Experience & Certifications:** Dedicated sections highlighting professional experience and academic achievements.
 * **Contact Information:** Easy ways to get in touch.
-* **Interactive AI Chatbot:** A live chatbot powered by Google Gemini, integrated directly into the portfolio.
+* **Interactive AI Chatbot:** Live chatbot powered by Mistral-7B v0.3 and Google Gemini, supporting both text and code queries.
+* **Code Generation:** Generate code snippets and get coding help via conversational AI.
+* **Image Generation:** Create images from text prompts using generative AI.
 * **Secure API:** Project management API endpoints are secured, allowing only authenticated users (via Django admin) to create, update, or delete projects.
+
+## Environment Variables
+
+### Backend (`.env` in project root)
+```
+# Django Settings
+DJANGO_SECRET_KEY=your_very_secret_key_here_for_dev_dont_share
+DJANGO_DEBUG=True
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,.betancourtosmar.com,web
+
+# PostgreSQL Settings (for local Docker container)
+POSTGRES_DB=django_db
+POSTGRES_USER=django_user
+POSTGRES_PASSWORD=django_password
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
+
+# Google Gemini API Key
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# Hugging Face Model and API Token
+HF_MODEL_ID=your_hf_model_id_here
+HF_API_TOKEN=your_huggingface_api_token_here
+
+# reCAPTCHA Secret Key
+RECAPTCHA_SECRET_KEY=your_recaptcha_secret_key_here
+
+# Google OAuth Client ID
+GOOGLE_CLIENT_ID=your_google_client_id_here
+```
+
+### Frontend (`frontend/.env.local`)
+```
+VITE_APP_BACKEND_URL=http://web:8000
+VITE_APP_FRONTEND_HOSTS=localhost,127.0.0.1
+VITE_RECAPTCHA_SITE_KEY=your_recaptcha_site_key_here
+VITE_GOOGLE_CLIENT_ID=your_google_client_id_here
+```
+
+* **`GOOGLE_CLIENT_ID`** and **`VITE_GOOGLE_CLIENT_ID`**: Required for Google OAuth login integration.
+* **`GEMINI_API_KEY`**: For Google Gemini AI features.
+* **`HF_MODEL_ID`** and **`HF_API_TOKEN`**: For custom Hugging Face model integration.
+* **`RECAPTCHA_SECRET_KEY`** and **`VITE_RECAPTCHA_SITE_KEY`**: For bot/spam protection.
 
 ## Getting Started (Local Development)
 
@@ -56,50 +105,16 @@ To run this project locally using Docker Compose, ensure you have Docker Desktop
 
 2.  **Create `.env` file for Backend:**
     Create a file named `.env` in the root of the `betancourt-osmar-portfolio/` directory (where `docker-compose.yml` is located). **Do NOT commit this file to Git.**
-    ```
-    # Django Settings
-    DJANGO_SECRET_KEY=your_very_secret_key_here_for_dev_dont_share
-    DJANGO_DEBUG=True
-    DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,.betancourtosmar.com,web # 'web' for Docker Compose internal network
-
-    # PostgreSQL Settings (for local Docker container)
-    POSTGRES_DB=django_db
-    POSTGRES_USER=django_user
-    POSTGRES_PASSWORD=django_password
-    POSTGRES_HOST=db
-    POSTGRES_PORT=5432
-
-    # Google Gemini API Key (for local AI chatbot functionality)
-    GEMINI_API_KEY=your_gemini_api_key_here
-
-    # Hugging Face Inference API Token (for custom AI model)
-    HF_API_TOKEN=your_huggingface_api_token_here
-
-    # reCAPTCHA Secret Key (for backend verification)
-    RECAPTCHA_SECRET_KEY=your_recaptcha_secret_key_here
-
-    # CSRF Settings for Local Admin Access (if needed)
-    DJANGO_CSRF_COOKIE_SECURE=False
-    DJANGO_CSRF_TRUSTED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000
-    ```
-    * **`DJANGO_SECRET_KEY`**: Replace with a random string.
-    * **`GEMINI_API_KEY`**: Obtain your API key from Google AI Studio.
-    * **`HF_API_TOKEN`**: Obtain your API token from Hugging Face for model inference.
-    * **`RECAPTCHA_SECRET_KEY`**: Obtain your reCAPTCHA secret key from Google reCAPTCHA Admin console.
+    (See above for required variables.)
 
 3.  **Create `.env.local` file for Frontend:**
     Create a file named `.env.local` inside the `frontend/` directory. **Add `/.env.local` to `frontend/.gitignore`.**
-    ```
-    VITE_APP_BACKEND_URL=http://web:8000
-    VITE_APP_FRONTEND_HOSTS=localhost,127.0.0.1
-    VITE_RECAPTCHA_SITE_KEY=your_recaptcha_site_key_here
-    ```
-    * **`VITE_RECAPTCHA_SITE_KEY`**: Obtain your reCAPTCHA site key from Google reCAPTCHA Admin console. This is a public key.
+    (See above for required variables.)
 
 4.  **Build and Run Docker Containers:**
     ```bash
     docker compose build
-    docker compose up --force-recreate # --force-recreate ensures latest env vars are picked up
+    docker compose up --force-recreate
     ```
 
 5.  **Apply Migrations and Create Superuser (Backend):**
@@ -113,7 +128,7 @@ To run this project locally using Docker Compose, ensure you have Docker Desktop
 6.  **Access the Applications Locally:**
     * **Frontend:** `http://localhost:5173/`
     * **Backend API:** `http://localhost:8000/api/projects/`
-    * **Django Admin:** `http://localhost:8000/admin/` (Login here to manage projects)
+    * **Django Admin:** `http://localhost:8000/admin/`
 
 ## Deployment
 
@@ -162,3 +177,14 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+## What's New
+
+- Upgraded to **Mistral-7B-Instruct-v0.3** for improved chat and codegen.
+- Added **code generation** and **image generation** features.
+- Integrated Google OAuth for secure login.
+- Improved environment variable management and documentation.
+- Enhanced AI chatbot with support for both text and code queries.
+- Improved deployment and security best practices.
