@@ -180,15 +180,19 @@ MEDIA_ROOT = '/project/media' # Absolute path for Docker volume/Render Persisten
 
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
 
-# --- Hugging Face Inference Endpoint Settings (NEW) ---
+# --- Hugging Face Inference Endpoint Settings ---
 # This is the ID of your fine-tuned model on Hugging Face Hub.
 # For a deployed Inference Endpoint, this would be the endpoint URL.
 # For the public inference API, it's the model ID (e.g., "betancourtosmar/fine-tuned-mistral-django-qa")
 HF_MODEL_ID = os.getenv('HF_MODEL_ID', 'betancourtosmar/fine-tuned-mistral-django-qa') # Default to your model ID
 HF_API_TOKEN = os.getenv('HF_API_TOKEN') # Your Hugging Face API token (read access)
 
-# --- Google reCAPTCHA Settings (NEW) ---
+# --- Google reCAPTCHA Settings ---
 # Your reCAPTCHA Secret Key (obtained from Google reCAPTCHA Admin Console)
 RECAPTCHA_SECRET_KEY = os.getenv('RECAPTCHA_SECRET_KEY')
 
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
+
+# --- Pinecone Settings ---
+PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY", None)
+PINECONE_HOST = os.environ.get("PINECONE_HOST", None)

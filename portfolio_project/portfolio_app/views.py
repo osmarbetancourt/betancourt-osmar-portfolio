@@ -12,12 +12,13 @@ from django.http import HttpResponse
 import os
 from huggingface_hub import InferenceClient # Ensure this is imported
 import traceback
+
 try:
     from PIL import Image
 except ImportError:
     Image = None
 
-from .models import Project, ImageGenerationUsage
+from .models import Project, ImageGenerationUsage, Conversation, Message
 from .serializers import ProjectSerializer
 from .google_auth import verify_google_token
 from datetime import datetime
