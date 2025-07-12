@@ -303,6 +303,43 @@ export default function CustomAIModelPage() {
     }
   };
 
+  // Create a new conversation on the backend and reset chat state
+  const handleNewConversation = async () => {
+    if (isCodeLoading) return;
+    setIsCodeLoading(true);
+    setCodeError(null);
+    try {
+      const token = getValidGoogleToken();
+      if (!token) {
+        setCodeError('Google login expired. Please sign in again.');
+        setIsCodeLoading(false);
+        return;
+      }
+      const res = await fetch('/api/conversation/', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to create new conversation.');
+      }
+      const data = await res.json();
+      setCodeMessages([]);
+      setCodeInput("");
+      setCodeResult("");
+      setCodeError(null);
+      setConversationId(data.id);
+      localStorage.setItem('codegen_conversation_id', data.id);
+      // Optionally refresh conversation list
+      setConversations(convs => [{ id: data.id, title: data.title, updated_at: data.updated_at }, ...convs]);
+    } catch (err) {
+      setCodeError(err.message);
+    } finally {
+      setIsCodeLoading(false);
+    }
+  };
+
+  // Old clear chat handler (still used for 'Clear' button)
   const handleClearCodeChat = () => {
     setCodeMessages([]);
     setCodeInput("");
@@ -488,9 +525,19 @@ export default function CustomAIModelPage() {
             {/* Conversation List Sidebar/Modal */}
             {showConvList && (
               <div className="absolute left-0 top-0 h-full w-72 bg-zinc-950 border-r border-zinc-800 shadow-xl z-30 flex flex-col">
-                <div className="flex items-center justify-between p-4 border-b border-zinc-800">
-                  <span className="font-bold text-lg text-white">Conversations</span>
-                  <button className="text-gray-400 hover:text-red-400" onClick={() => setShowConvList(false)} title="Close">&times;</button>
+                <div className="flex flex-col gap-2 p-4 border-b border-zinc-800">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-lg text-white">Conversations</span>
+                    <button className="text-gray-400 hover:text-red-400" onClick={() => setShowConvList(false)} title="Close">&times;</button>
+                  </div>
+                  <button
+                    className="mt-2 px-3 py-1 bg-purple-700 hover:bg-purple-800 text-white rounded text-sm font-bold border border-purple-900 transition-colors duration-150"
+                    onClick={handleNewConversation}
+                    disabled={isCodeLoading}
+                    title="Start a new conversation"
+                  >
+                    + New Conversation
+                  </button>
                 </div>
                 <div className="flex-1 overflow-y-auto">
                   {isConvLoading ? (
@@ -524,7 +571,7 @@ export default function CustomAIModelPage() {
                 </div>
               </div>
             )}
-            <div className="p-4 bg-zinc-800 text-gray-100 text-center rounded-t-xl shadow-md border-b border-zinc-700 flex justify-between items-center">
+            <div className="p-4 pl-32 bg-zinc-800 text-gray-100 text-center rounded-t-xl shadow-md border-b border-zinc-700 flex justify-between items-center">
               <h1 className="text-2xl font-bold font-inter">Code Generation (Conversational)</h1>
               <button
                 className="text-sm text-gray-400 hover:text-red-400 border border-zinc-700 rounded px-3 py-1 ml-2"

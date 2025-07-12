@@ -3,7 +3,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 # MODIFIED: Import the new custom_ai_model_view
-from .views import ProjectViewSet, health_check, gemini_chat_view, custom_ai_model_view, codellama_codegen_view, flux_image_view, conversation_history_view, conversation_list_view, conversation_delete_view
+from .views import ProjectViewSet, health_check, gemini_chat_view, custom_ai_model_view, codellama_codegen_view, flux_image_view, conversation_history_view, conversation_list_view, conversation_delete_view, conversation_create_view
 from django.views.decorators.csrf import csrf_exempt
 
 # Create a router and register our viewsets with it.
@@ -39,4 +39,6 @@ urlpatterns = [
 
     # API endpoint for deleting a conversation (protected)
     path('api/conversation/<int:conversation_id>/', conversation_delete_view, name='conversation_delete'),
+    # API endpoint for creating a new conversation (POST)
+    path('api/conversation/', conversation_create_view, name='conversation_create'),
 ]

@@ -1,3 +1,4 @@
+
 from rest_framework.decorators import api_view
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
@@ -31,6 +32,35 @@ from .rag_pipeline import (
     call_codegen_llm,
     trim_conversation_history_to_fit_tokens,
 )
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@authentication_classes([])
+def conversation_create_view(request):
+    """
+    Creates a new conversation for the authenticated user and returns its id and metadata.
+    Requires Google ID token in Authorization header.
+    """
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return Response({'error': 'Authorization header missing or invalid.'}, status=401)
+    google_token = auth_header.split(' ')[1]
+    user_info = verify_google_token(google_token)
+    if not user_info:
+        return Response({'error': 'Invalid or expired Google token.'}, status=401)
+    google_user_id = user_info.get('sub')
+    if not google_user_id:
+        return Response({'error': 'Google user ID not found in token.'}, status=401)
+    try:
+        conversation = Conversation.objects.create(google_user_id=google_user_id)
+        return Response({
+            'id': conversation.id,
+            'title': conversation.title,
+            'updated_at': conversation.updated_at,
+        }, status=201)
+    except Exception as e:
+        print(f"[conversation_create_view] Error: {e}")
+        return Response({'error': 'Failed to create new conversation.'}, status=500)
 
 @api_view(['DELETE'])
 @permission_classes([AllowAny])
