@@ -1,3 +1,5 @@
+# FastAPI MCP server (local dev only)
+fast-mcp/
 # Python
 *.pyc
 __pycache__/
@@ -16,8 +18,15 @@ env/
 # IDEs
 .vscode/           # VS Code (if you have user-specific settings you don't want to share)
 
+# CV and personal resume files (do not push to cloud)
+CV_Osmar.md
+cv-style.css
+cv*/
+cv*
+
 # Django-specific
 *.sqlite3         # SQLite database file (if used locally)
 /media/            # User-uploaded media files (these should not be in version control)
 staticfiles/       # Collected static files (generated during deployment, not source code)
 *.mo               # Compiled message files for internationalization
+

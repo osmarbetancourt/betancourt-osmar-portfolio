@@ -58,6 +58,8 @@ export default function CustomAIModelPage() {
     const stored = localStorage.getItem('codegen_conversation_id');
     return stored ? parseInt(stored, 10) : null;
   });
+  const conversationIdRef = useRef(conversationId);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(false);
 
   // Fetch all conversations for the user (codegen only)
   useEffect(() => {
@@ -85,8 +87,10 @@ export default function CustomAIModelPage() {
 
   // Auto-load last codegen conversation history on mount or when conversationId changes
   useEffect(() => {
+    conversationIdRef.current = conversationId;
     const fetchHistory = async () => {
       if (!conversationId || !googleToken) return;
+      setIsHistoryLoading(true);
       try {
         const res = await fetch(`/api/conversation/${conversationId}/history/`, {
           method: 'GET',
@@ -99,6 +103,7 @@ export default function CustomAIModelPage() {
           setConversationId(null);
           localStorage.removeItem('codegen_conversation_id');
           setCodeMessages([]);
+          setIsHistoryLoading(false);
           return;
         }
         if (!res.ok) throw new Error('Failed to fetch conversation history.');
@@ -115,6 +120,8 @@ export default function CustomAIModelPage() {
         setConversationId(null);
         localStorage.removeItem('codegen_conversation_id');
         setCodeMessages([]);
+      } finally {
+        setIsHistoryLoading(false);
       }
     };
     if (activeModel === 'code') {
@@ -258,13 +265,17 @@ export default function CustomAIModelPage() {
         setCodeError('Google login expired. Please sign in again.');
         return;
       }
+      // Always send conversation_id if present, using ref for latest value
+      const body = { input: userMsg.text };
+      const isNewConversation = !conversationIdRef.current;
+      if (conversationIdRef.current) body.conversation_id = conversationIdRef.current;
       const res = await fetch("/api/codegen/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ input: userMsg.text })
+        body: JSON.stringify(body)
       });
       if (!res.ok) {
         const errorData = await res.json();
@@ -274,8 +285,8 @@ export default function CustomAIModelPage() {
       const aiMsg = { sender: 'ai', text: data.response || "No code generated." };
       setCodeMessages((prev) => [...prev, aiMsg]);
       setCodeResult(data.response || "No code generated.");
-      // Store conversation_id if present
-      if (data.conversation_id) {
+      // Only update conversationId if this was a new conversation
+      if (isNewConversation && data.conversation_id) {
         setConversationId(data.conversation_id);
         localStorage.setItem('codegen_conversation_id', data.conversation_id);
       }
@@ -351,9 +362,11 @@ export default function CustomAIModelPage() {
 
   // --- Conversation List Handlers ---
   const handleSelectConversation = async (convId) => {
+    setIsHistoryLoading(true);
     setConversationId(convId);
     localStorage.setItem('codegen_conversation_id', convId);
     setShowConvList(false);
+    // The effect will handle loading history and set isHistoryLoading to false
   };
 
   const handleDeleteConversation = async (convId) => {
@@ -513,15 +526,29 @@ export default function CustomAIModelPage() {
         );
       case 'code':
         return (
-          <div className="w-full max-w-3xl bg-zinc-900 rounded-xl shadow-lg flex flex-col h-[70vh] overflow-hidden border border-zinc-800 mt-8 relative">
-            {/* Conversation List Button */}
-            <button
-              className="absolute left-4 top-4 z-20 px-3 py-1 bg-zinc-800 text-gray-300 border border-zinc-700 rounded hover:bg-zinc-700 text-sm font-bold"
-              onClick={() => setShowConvList(v => !v)}
-              title="Show all conversations"
-            >
-              {showConvList ? 'Hide' : 'Conversations'}
-            </button>
+          <div className="w-full max-w-3xl bg-zinc-900 rounded-xl shadow-lg flex flex-col h-[70vh] overflow-hidden border border-zinc-800 mt-8">
+            {/* Single Chat Header with Conversations button, centered title, and Clear button */}
+            <div className="p-4 bg-zinc-800 text-gray-100 rounded-t-xl shadow-md border-b border-zinc-700 flex items-center justify-between gap-2">
+              {/* Left: Conversations button */}
+              <button
+                className="px-3 py-1 bg-zinc-800 text-gray-300 border border-zinc-700 rounded hover:bg-zinc-700 text-sm font-bold"
+                onClick={() => setShowConvList(v => !v)}
+                title="Show all conversations"
+              >
+                {showConvList ? 'Hide' : 'Conversations'}
+              </button>
+              {/* Center: Title */}
+              <h1 className="flex-1 text-2xl font-bold font-inter text-center">Code Generation (Conversational)</h1>
+              {/* Right: Clear button */}
+              <button
+                className="text-sm text-gray-400 hover:text-red-400 border border-zinc-700 rounded px-3 py-1 ml-2"
+                onClick={handleClearCodeChat}
+                disabled={isCodeLoading || codeMessages.length === 0}
+                title="Clear conversation"
+              >
+                Clear
+              </button>
+            </div>
             {/* Conversation List Sidebar/Modal */}
             {showConvList && (
               <div className="absolute left-0 top-0 h-full w-72 bg-zinc-950 border-r border-zinc-800 shadow-xl z-30 flex flex-col">
@@ -571,17 +598,6 @@ export default function CustomAIModelPage() {
                 </div>
               </div>
             )}
-            <div className="p-4 pl-32 bg-zinc-800 text-gray-100 text-center rounded-t-xl shadow-md border-b border-zinc-700 flex justify-between items-center">
-              <h1 className="text-2xl font-bold font-inter">Code Generation (Conversational)</h1>
-              <button
-                className="text-sm text-gray-400 hover:text-red-400 border border-zinc-700 rounded px-3 py-1 ml-2"
-                onClick={handleClearCodeChat}
-                disabled={isCodeLoading || codeMessages.length === 0}
-                title="Clear conversation"
-              >
-                Clear
-              </button>
-            </div>
             {/* Codegen Chat Area */}
             <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-zinc-900 text-gray-100">
               {codeMessages.map((msg, idx) => (
@@ -625,20 +641,20 @@ export default function CustomAIModelPage() {
             <div className="p-4 border-t border-zinc-700 flex items-center bg-zinc-900 rounded-b-xl">
               <textarea
                 className="flex-1 p-3 border border-zinc-700 bg-zinc-800 text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 font-inter resize-none h-12 overflow-hidden placeholder-gray-400"
-                placeholder={isCodeLoading ? "Generating..." : "Enter your code prompt here..."}
+                placeholder={isHistoryLoading ? "Loading conversation..." : isCodeLoading ? "Generating..." : "Enter your code prompt here..."}
                 value={codeInput}
                 onChange={e => setCodeInput(e.target.value)}
                 onKeyPress={handleCodeInputKeyPress}
                 rows={1}
                 maxLength={1000}
-                disabled={isCodeLoading}
+                disabled={isCodeLoading || isHistoryLoading}
               />
               <button
                 onClick={handleSendCodePrompt}
                 className="ml-3 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-md font-bold font-inter flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isCodeLoading || codeInput.trim() === ""}
+                disabled={isCodeLoading || isHistoryLoading || codeInput.trim() === ""}
               >
-                {isCodeLoading ? "Generating..." : "Send"}
+                {isCodeLoading ? "Generating..." : isHistoryLoading ? "Loading..." : "Send"}
               </button>
             </div>
             {codeError && <div className="p-2 text-center text-red-400 bg-zinc-800 border-t border-zinc-700">{codeError}</div>}

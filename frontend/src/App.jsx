@@ -50,31 +50,29 @@ export default function App() {
   const experiences = [
     {
       id: 1,
-      title: "IT Technical Leader and Senior Jira Analyst",
+      title: "IT Technical Leader & Senior Jira Analyst",
       company: "Solutions for Everyone S4E",
-      dates: "March 2024 - Ongoing",
-      location: "Remote", // Assuming remote based on previous context, adjust if needed
+      dates: "2024 (March) – Present",
+      location: "Remote",
       description: [
-        "Maintaining high software solution quality and validating the software deployments.",
-        "Working as project leader and the company Technical Leader.",
-        "Mentoring and training junior, associates and trainees team members.",
-        "Identify customer pain points to design software solutions based on Jira or custom software.",
-        "Implementing AI Solutions such as Jira ChatBots and Customer Chatbots."
+        "Leading technical projects and teams, software validation, and AI solution design (Jira/Customer ChatBots).",
+        "Delivering robust full-stack software solutions and deploying AI agents within existing cloud environments.",
+        "Designing and implementing software solutions, and reviewing technical designs from team members.",
+        "Acting as the main technical representative in customer meetings, translating requirements and presenting solutions."
       ],
     },
     {
       id: 2,
-      title: "Jira Analyst and AWS Cloud Practitioner",
+      title: "Jira Analyst & AWS Cloud Practitioner",
       company: "Solutions for Everyone S4E",
-      dates: "June 2021 - March 2024",
-      location: "Remote", // Assuming remote based on previous context, adjust if needed
+      dates: "2021 (June) – 2024 (March)",
+      location: "Remote",
       description: [
-        "Finding software solutions to customer’s problems based on their needs.",
-        "Working and coordinating developments in Jira, AWS, Python APIs with multiple members of a team.",
-        "Customer support and design of software applicable to their description."
+        "Software solution design and customer support.",
+        "Coordinated Python API, Jira, AWS projects.",
+        "Developed, deployed, and maintained scalable cloud solutions."
       ],
     },
-    // Removed the previous generic experience entries
   ];
 
 
@@ -140,11 +138,7 @@ export default function App() {
                 Hi, I'm <span className="text-purple-600">Osmar Betancourt</span>
               </h2>
               <p className="text-lg md:text-xl text-gray-700 mb-8 max-w-2xl">
-                A passionate Python Developer and self-learner
-                in many other programming languages such as SQL, Matlab, JavaScript and other technologies
-                with 4+ years of Experience programming and working in IT and Cloud Solutions with
-                IaaS, Paas and SaaS, heavily focusing on Python and now focused on working with
-                PyTorch, LLMs and ML.
+                An AI Full Stack Engineer with 4+ years of experience. I specialize in integrating and customizing AI agents and LLMs—ranging from OpenAI, Gemini, and Hugging Face to fully bespoke models—within real-world platforms and MCPs. My hands-on approach spans the entire stack, building robust solutions that bridge cutting-edge AI with proven software practices. My expertise covers ETL data pipelines, full-stack development, and DevOps deployment, enabling seamless AI integration into both new and traditional software landscapes.
               </p>
               <a
                 href="#projects" // Scroll to projects section
@@ -157,7 +151,7 @@ export default function App() {
             {/* New Banner-like Separator for Projects section */}
             <div className="w-full bg-gradient-to-r from-blue-700 to-purple-800 text-white text-center py-8 shadow-lg">
               <h2 className="text-3xl font-bold mb-2">My Projects</h2>
-              <p className="text-lg">Explore my work and passion for data and development.</p>
+              <p className="text-lg">Explore my work and passion for AI and Software Development.</p>
                 <div id="projects" className="container mx-auto p-4 sm:p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {loading ? (
                     <p className="col-span-full text-center text-gray-700">Loading projects...</p>

@@ -1,0 +1,11 @@
+{
+  "servers": {
+    "github": {
+      "url": "https://api.githubcopilot.com/mcp/"
+    },
+  "my-fastmcp": {
+    "command": "python",
+    "args": ["fast-mcp/my_fastmcp_server.py"]
+    },
+  }
+}

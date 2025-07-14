@@ -405,6 +405,7 @@ def codellama_codegen_view(request):
     if not user_info:
         return Response({'error': 'Invalid or expired Google token.'}, status=401)
 
+
     try:
         from .rag_pipeline import extract_urls, is_url_safe, fetch_and_clean_url_content
     except ImportError as e:
@@ -412,7 +413,6 @@ def codellama_codegen_view(request):
         return Response({'error': 'Failed to import RAG pipeline URL utilities.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     try:
-
         data = json.loads(request.body)
         user_input = data.get('input')
         if user_input is not None:
@@ -420,11 +420,26 @@ def codellama_codegen_view(request):
         if not user_input:
             return Response({'error': 'Input field is required for code generation'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # --- Conversation History from DB ---
+        # --- Conversation History from DB (RESPECT conversation_id) ---
         conversation_history = []
         google_user_id = user_info.get('sub')
         conversation = None
-        if google_user_id:
+        conversation_id = data.get('conversation_id')
+        if conversation_id:
+            # Try to fetch the conversation by ID and check ownership
+            conversation = Conversation.objects.filter(id=conversation_id, google_user_id=google_user_id).first()
+            if conversation:
+                messages = conversation.messages.order_by('created_at')
+                for msg in messages:
+                    conversation_history.append({
+                        'role': msg.sender,
+                        'content': msg.content,
+                    })
+            else:
+                # If not found or not owned, fallback to empty history
+                conversation = None
+        if not conversation:
+            # Fallback to most recent conversation in last 12 hours
             from django.utils import timezone
             from datetime import timedelta
             now = timezone.now()
@@ -434,14 +449,13 @@ def codellama_codegen_view(request):
                 updated_at__gte=twelve_hours_ago
             ).order_by('-updated_at').first()
             if conversation:
-                # Build conversation history from all messages in this conversation
                 messages = conversation.messages.order_by('created_at')
                 for msg in messages:
                     conversation_history.append({
                         'role': msg.sender,
                         'content': msg.content,
                     })
-        # If no conversation found, fallback to request's history field (if present)
+        # If still no conversation/history, fallback to request's history field (if present)
         if not conversation_history:
             conversation_history = data.get('history', []) or []
 
@@ -521,19 +535,11 @@ def codellama_codegen_view(request):
             if marker in filtered_code:
                 filtered_code = filtered_code.split(marker, 1)[-1].strip()
 
+
         # --- Conversation Storage ---
         try:
-            google_user_id = user_info.get('sub')
             if google_user_id:
-                # Find the most recent conversation updated in the last 12 hours, or create new
-                from django.utils import timezone
-                from datetime import timedelta
-                now = timezone.now()
-                twelve_hours_ago = now - timedelta(hours=12)
-                conversation = Conversation.objects.filter(
-                    google_user_id=google_user_id,
-                    updated_at__gte=twelve_hours_ago
-                ).order_by('-updated_at').first()
+                # If conversation_id was provided and found, use it; else, use the fallback (may be None)
                 if not conversation:
                     conversation = Conversation.objects.create(google_user_id=google_user_id)
                 # Save user message
@@ -549,6 +555,7 @@ def codellama_codegen_view(request):
                     content=filtered_code,
                 )
                 # Update conversation timestamp
+                from django.utils import timezone
                 conversation.updated_at = timezone.now()
                 conversation.save(update_fields=['updated_at'])
         except Exception as db_exc:
