@@ -46,31 +46,44 @@ export default function App() {
     },
   ];
 
-  // Hardcoded experience data for display
+  // Updated experience data to match current CV
   const experiences = [
     {
       id: 1,
-      title: "IT Technical Leader & Senior Jira Analyst",
-      company: "Solutions for Everyone S4E",
-      dates: "2024 (March) – Present",
+      title: "Tech Leader & End-to-End AI Platform Engineer",
+      company: "Moneybook",
+      dates: "2025 (August) – Present",
       location: "Remote",
       description: [
-        "Leading technical projects and teams, software validation, and AI solution design (Jira/Customer ChatBots).",
-        "Delivering robust full-stack software solutions and deploying AI agents within existing cloud environments.",
-        "Designing and implementing software solutions, and reviewing technical designs from team members.",
-        "Acting as the main technical representative in customer meetings, translating requirements and presenting solutions."
+        "Designed and implemented the full AWS architecture and DevOps strategy for a virtual AI assistant platform focused on bank debt collection.",
+        "Developed the entire backend in Django, containerizing the solution with Docker and integrating best practices for scalable deployments.",
+        "Engineered a custom AI agent using OpenAI Agents SDK and Model Context Protocol (MCP) for advanced automation and integration."
       ],
     },
     {
       id: 2,
+      title: "IT Technical Leader & Senior Jira Analyst",
+      company: "Solutions for Everyone S4E",
+      dates: "2024 (March) – 2025 (August)",
+      location: "Remote",
+      description: [
+        "Led technical projects and teams, software validation, and AI solution design (Jira/Customer ChatBots).",
+        "Delivered robust full-stack software solutions and deployed AI agents within cloud environments.",
+        "Acted as the main technical representative in customer meetings, translating requirements and presenting solutions.",
+        "Mentored and trained new team members, fostering a collaborative environment."
+      ],
+    },
+    {
+      id: 3,
       title: "Jira Analyst & AWS Cloud Practitioner",
       company: "Solutions for Everyone S4E",
       dates: "2021 (June) – 2024 (March)",
       location: "Remote",
       description: [
-        "Software solution design and customer support.",
-        "Coordinated Python API, Jira, AWS projects.",
-        "Developed, deployed, and maintained scalable cloud solutions."
+        "Led and coordinated technical projects using agile methodologies (Kanban and Scrum) to ensure project continuity and timely delivery.",
+        "Automated key software creation processes, reducing delivery time from 30 hours to 2 hours and significantly increasing team efficiency.",
+        "Provided expert guidance and removed technical roadblocks for the team.",
+        "Managed successful Jira and AWS integrations, collaborating with cross-functional teams."
       ],
     },
   ];
@@ -138,7 +151,7 @@ export default function App() {
                 Hi, I'm <span className="text-purple-600">Osmar Betancourt</span>
               </h2>
               <p className="text-lg md:text-xl text-gray-700 mb-8 max-w-2xl">
-                An AI Full Stack Engineer with 4+ years of experience. I specialize in integrating and customizing AI agents and LLMs—ranging from OpenAI, Gemini, and Hugging Face to fully bespoke models—within real-world platforms and MCPs. My hands-on approach spans the entire stack, building robust solutions that bridge cutting-edge AI with proven software practices. My expertise covers ETL data pipelines, full-stack development, and DevOps deployment, enabling seamless AI integration into both new and traditional software landscapes.
+                AI Full Stack Engineer with 4+ years of experience specializing in integration and customization of AI agents and LLMs including OpenAI, Gemini, Hugging Face, and bespoke models within real-world platforms and MCPs. Demonstrates hands on expertise across the entire stack, building robust solutions that bridge cutting edge AI with proven software practices. Areas of proficiency include ETL data pipelines, full-stack development, and DevOps deployment, enabling seamless AI integration into both new and traditional software landscapes.
               </p>
               <a
                 href="#projects" // Scroll to projects section

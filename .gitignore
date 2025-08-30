@@ -30,3 +30,4 @@ cv*
 staticfiles/       # Collected static files (generated during deployment, not source code)
 *.mo               # Compiled message files for internationalization
 
+.vscode/
