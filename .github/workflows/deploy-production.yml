@@ -1,0 +1,66 @@
+name: Deploy to Hetzner (Production)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Create .env file for backend from GitHub secrets
+        run: |
+          cat <<EOF > .env
+          DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
+          DJANGO_DEBUG=${{ secrets.DJANGO_DEBUG }}
+          DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}
+          DJANGO_CSRF_TRUSTED_ORIGINS=${{ secrets.DJANGO_CSRF_TRUSTED_ORIGINS }}
+          DJANGO_CSRF_COOKIE_SECURE=${{ secrets.DJANGO_CSRF_COOKIE_SECURE }}
+          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
+          POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}
+          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+          HF_MODEL_ID=${{ secrets.HF_MODEL_ID }}
+          HF_API_TOKEN=${{ secrets.HF_API_TOKEN }}
+          RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }}
+          GOOGLE_SAFE_BROWSING_API_KEY=${{ secrets.GOOGLE_SAFE_BROWSING_API_KEY }}
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}
+          PINECONE_HOST=${{ secrets.PINECONE_HOST }}
+          MCP_DATA_ROOT=${{ secrets.MCP_DATA_ROOT }}
+          RENDER_API_KEY=${{ secrets.RENDER_API_KEY }}
+          HETZNER_API_TOKEN=${{ secrets.HETZNER_API_TOKEN }}
+          HETZNER_HOST=${{ secrets.HETZNER_HOST }}
+          HETZNER_PROJECT_PATH=${{ secrets.HETZNER_PROJECT_PATH }}
+          HETZNER_PASSWORD=${{ secrets.HETZNER_PASSWORD }}
+          HETZNER_USER=${{ secrets.HETZNER_USER }}
+          EOF
+
+      - name: Create frontend/.env.local file from GitHub secrets
+        run: |
+          cat <<EOF > frontend/.env.local
+          VITE_APP_BACKEND_URL=${{ secrets.VITE_APP_BACKEND_URL }}
+          VITE_APP_FRONTEND_HOSTS=${{ secrets.VITE_APP_FRONTEND_HOSTS }}
+          VITE_RECAPTCHA_SITE_KEY=${{ secrets.VITE_RECAPTCHA_SITE_KEY }}
+          VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+          EOF
+
+      - name: Copy files to Hetzner server
+        run: |
+          sshpass -p "${{ secrets.HETZNER_PASSWORD }}" rsync -az --delete --include='.env' --include='frontend/.env.local' -e "ssh -o StrictHostKeyChecking=no" ./ ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }}:${{ secrets.HETZNER_PROJECT_PATH }}
+
+      - name: Deploy on Hetzner server
+        run: |
+          sshpass -p "${{ secrets.HETZNER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }} '
+            cd ${{ secrets.HETZNER_PROJECT_PATH }} &&
+            docker compose pull &&
+            docker compose up -d --build
+          '

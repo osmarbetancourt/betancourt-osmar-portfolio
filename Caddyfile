@@ -1,0 +1,7 @@
+betancourtosmar.com, www.betancourtosmar.com {
+  reverse_proxy frontend:5173
+}
+
+api.betancourtosmar.com {
+  reverse_proxy web:8000
+}

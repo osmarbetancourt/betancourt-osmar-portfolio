@@ -1,0 +1,198 @@
+name: Deploy to Hetzner (Staging)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    environment: staging
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: mercedes_demo
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      POSTGRES_DB: mercedes_demo
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      SECRET_KEY: test-secret
+      DEBUG: True
+      ALLOWED_HOSTS: localhost,127.0.0.1
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Create .env file for Docker Compose (from secrets)
+        run: |
+          cat <<EOF > .env
+          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
+          POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}
+          SECRET_KEY=${{ secrets.SECRET_KEY }}
+          DEBUG=${{ secrets.DEBUG }}
+          ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}
+          REDIS_URL=${{ secrets.REDIS_URL }}
+          INTERNAL_API_TOKEN=${{ secrets.INTERNAL_API_TOKEN }}
+          HF_API_KEY=${{ secrets.HF_API_KEY }}
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          WHATSAPP_BUSINESS_ID=${{ secrets.WHATSAPP_BUSINESS_ID }}
+          WHATSAPP_FLOW_ID=${{ secrets.WHATSAPP_FLOW_ID }}
+          WHATSAPP_PHONE_NUMBER_ID=${{ secrets.WHATSAPP_PHONE_NUMBER_ID }}
+          WHATSAPP_TOKEN=${{ secrets.WHATSAPP_TOKEN }}
+          WHATSAPP_WEBHOOK_SECRET=${{ secrets.WHATSAPP_WEBHOOK_SECRET }}
+          WHATSAPP_WEBHOOK_VERIFY_TOKEN=${{ secrets.WHATSAPP_WEBHOOK_VERIFY_TOKEN }}
+          APP_SECRET=${{ secrets.APP_SECRET }}
+          CONFIRM_TRANSACTION_URL=${{ secrets.CONFIRM_TRANSACTION_URL }}
+          ENDPOINTS_URL=${{ secrets.ENDPOINTS_URL }}
+          PRIVATE_KEY=${{ secrets.PRIVATE_KEY }}
+          PUBLIC_KEY=${{ secrets.PUBLIC_KEY }}
+          GOOGLE_SHEETS_ID=${{ secrets.GOOGLE_SHEETS_ID }}
+          GOOGLE_SA_TYPE=${{ secrets.GOOGLE_SA_TYPE }}
+          GOOGLE_SA_PROJECT_ID=${{ secrets.GOOGLE_SA_PROJECT_ID }}
+          GOOGLE_SA_PRIVATE_KEY_ID=${{ secrets.GOOGLE_SA_PRIVATE_KEY_ID }}
+          GOOGLE_SA_PRIVATE_KEY=${{ secrets.GOOGLE_SA_PRIVATE_KEY }}
+          GOOGLE_SA_CLIENT_EMAIL=${{ secrets.GOOGLE_SA_CLIENT_EMAIL }}
+          GOOGLE_SA_CLIENT_ID=${{ secrets.GOOGLE_SA_CLIENT_ID }}
+          GOOGLE_SA_AUTH_URI=${{ secrets.GOOGLE_SA_AUTH_URI }}
+          GOOGLE_SA_TOKEN_URI=${{ secrets.GOOGLE_SA_TOKEN_URI }}
+          GOOGLE_SA_AUTH_PROVIDER_X509_CERT_URL=${{ secrets.GOOGLE_SA_AUTH_PROVIDER_X509_CERT_URL }}
+          GOOGLE_SA_CLIENT_X509_CERT_URL=${{ secrets.GOOGLE_SA_CLIENT_X509_CERT_URL }}
+          GOOGLE_SA_UNIVERSE_DOMAIN=${{ secrets.GOOGLE_SA_UNIVERSE_DOMAIN }}
+          R4_API_KEY=${{ secrets.R4_API_KEY }}
+          ENVIRONMENT=${{ secrets.ENVIRONMENT }}
+          GG_WHATSAPP_TOKEN=${{ secrets.GG_WHATSAPP_TOKEN }}
+          GG_WHATSAPP_FLOW_ID=${{ secrets.GG_WHATSAPP_FLOW_ID }}
+          GG_WHATSAPP_PHONE_NUMBER_ID=${{ secrets.GG_WHATSAPP_PHONE_NUMBER_ID }}
+          GG_WHATSAPP_BUSINESS_ID=${{ secrets.GG_WHATSAPP_BUSINESS_ID }}
+          GG_GOOGLE_SHEETS_ID=${{ secrets.GG_GOOGLE_SHEETS_ID }}
+          GLIDE_PAYMENT_RESULT_URL=${{ secrets.GLIDE_PAYMENT_RESULT_URL }}
+          UNIVERSITAS_API_TOKEN=${{ secrets.UNIVERSITAS_API_TOKEN }}
+          EOF
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build web image with cache
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          tags: mercedes-demo-web:latest
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Start services
+        run: |
+          docker compose up -d
+
+      - name: Wait for web container to start (fixed sleep)
+        run: |
+          echo "Sleeping 20 seconds to allow web service to start..."
+          sleep 20
+
+      - name: Run tests in web container
+        run: |
+          docker compose exec -T web python manage.py test
+
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Create .env file from GitHub environment secrets
+        run: |
+          cat <<EOF > .env
+          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
+          POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}
+          SECRET_KEY=${{ secrets.SECRET_KEY }}
+          DEBUG=${{ secrets.DEBUG }}
+          ENVIRONMENT=${{ secrets.ENVIRONMENT }}
+          ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}
+          REDIS_URL=${{ secrets.REDIS_URL }}
+          WHATSAPP_TOKEN=${{ secrets.WHATSAPP_TOKEN }}
+          WHATSAPP_PHONE_NUMBER_ID=${{ secrets.WHATSAPP_PHONE_NUMBER_ID }}
+          WHATSAPP_BUSINESS_ID=${{ secrets.WHATSAPP_BUSINESS_ID }}
+          WHATSAPP_FLOW_ID=${{ secrets.WHATSAPP_FLOW_ID }}
+          WHATSAPP_WEBHOOK_VERIFY_TOKEN=${{ secrets.WHATSAPP_WEBHOOK_VERIFY_TOKEN }}
+          WHATSAPP_WEBHOOK_SECRET=${{ secrets.WHATSAPP_WEBHOOK_SECRET }}
+          INTERNAL_API_TOKEN=${{ secrets.INTERNAL_API_TOKEN }}
+          HF_API_KEY=${{ secrets.HF_API_KEY }}
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION=${{ secrets.AWS_REGION }}
+          MESSANGI_API_KEY=${{ secrets.MESSANGI_API_KEY }}
+          R4_API_KEY=${{ secrets.R4_API_KEY }}
+          HETZNER_API_TOKEN=${{ secrets.HETZNER_API_TOKEN }}
+          R4_ENDPOINT_LEGACY=${{ secrets.R4_ENDPOINT_LEGACY }}
+          APP_SECRET=${{ secrets.APP_SECRET }}
+          CONFIRM_TRANSACTION_URL=${{ secrets.CONFIRM_TRANSACTION_URL }}
+          ENDPOINTS_URL=${{ secrets.ENDPOINTS_URL }}
+          PRIVATE_KEY=${{ secrets.PRIVATE_KEY }}
+          PUBLIC_KEY=${{ secrets.PUBLIC_KEY }}
+          GOOGLE_SHEETS_ID=${{ secrets.GOOGLE_SHEETS_ID }}
+          GOOGLE_SA_TYPE=${{ secrets.GOOGLE_SA_TYPE }}
+          GOOGLE_SA_PROJECT_ID=${{ secrets.GOOGLE_SA_PROJECT_ID }}
+          GOOGLE_SA_PRIVATE_KEY_ID=${{ secrets.GOOGLE_SA_PRIVATE_KEY_ID }}
+          GOOGLE_SA_PRIVATE_KEY=${{ secrets.GOOGLE_SA_PRIVATE_KEY }}
+          GOOGLE_SA_CLIENT_EMAIL=${{ secrets.GOOGLE_SA_CLIENT_EMAIL }}
+          GOOGLE_SA_CLIENT_ID=${{ secrets.GOOGLE_SA_CLIENT_ID }}
+          GOOGLE_SA_AUTH_URI=${{ secrets.GOOGLE_SA_AUTH_URI }}
+          GOOGLE_SA_TOKEN_URI=${{ secrets.GOOGLE_SA_TOKEN_URI }}
+          GOOGLE_SA_AUTH_PROVIDER_X509_CERT_URL=${{ secrets.GOOGLE_SA_AUTH_PROVIDER_X509_CERT_URL }}
+          GOOGLE_SA_CLIENT_X509_CERT_URL=${{ secrets.GOOGLE_SA_CLIENT_X509_CERT_URL }}
+          GOOGLE_SA_UNIVERSE_DOMAIN=${{ secrets.GOOGLE_SA_UNIVERSE_DOMAIN }}
+          TEALCA_INTERNAL_TOKEN=${{ secrets.TEALCA_INTERNAL_TOKEN }}
+          HETZNER_HOST=${{ secrets.HETZNER_HOST }}
+          HETZNER_PROJECT_PATH=${{ secrets.HETZNER_PROJECT_PATH }}
+          HETZNER_PASSWORD=${{ secrets.HETZNER_PASSWORD }}
+          HETZNER_USER=${{ secrets.HETZNER_USER }}
+          GG_WHATSAPP_TOKEN=${{ secrets.GG_WHATSAPP_TOKEN }}
+          GG_WHATSAPP_FLOW_ID=${{ secrets.GG_WHATSAPP_FLOW_ID }}
+          GG_WHATSAPP_PHONE_NUMBER_ID=${{ secrets.GG_WHATSAPP_PHONE_NUMBER_ID }}
+          GG_WHATSAPP_BUSINESS_ID=${{ secrets.GG_WHATSAPP_BUSINESS_ID }}
+          GG_GOOGLE_SHEETS_ID=${{ secrets.GG_GOOGLE_SHEETS_ID }}
+          GLIDE_PAYMENT_RESULT_URL=${{ secrets.GLIDE_PAYMENT_RESULT_URL }}
+          UNIVERSITAS_API_TOKEN=${{ secrets.UNIVERSITAS_API_TOKEN }}
+          EOF
+
+      - name: Copy files to Hetzner server
+        run: |
+          sshpass -p "${{ secrets.HETZNER_PASSWORD }}" rsync -az --delete --include='.env' -e "ssh -o StrictHostKeyChecking=no" ./ ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }}:${{ secrets.HETZNER_PROJECT_PATH }}
+
+      - name: Deploy on Hetzner server
+        run: |
+          sshpass -p "${{ secrets.HETZNER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }} '
+            cd ${{ secrets.HETZNER_PROJECT_PATH }} &&
+            docker compose pull &&
+            docker compose up -d --build
+          '

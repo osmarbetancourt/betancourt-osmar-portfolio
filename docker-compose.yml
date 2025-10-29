@@ -1,9 +1,9 @@
 services:
   # Web service for the Django application
   web:
-    build: ./portfolio_project # Tells Docker Compose to build from the new folder
+    build: ./portfolio_project
     volumes:
-      - ./portfolio_project:/portfolio_project # Mounts the project code
+      - ./portfolio_project:/portfolio_project
       - media_data:/project/media # Persistent volume for media files
     ports:
       - "8000:8000"
@@ -11,8 +11,6 @@ services:
       - ./.env # Loads environment variables from the .env file
     environment:
       DJANGO_SETTINGS_MODULE: project.settings
-      # NEW: Explicitly set DATABASE_URL for local Docker Compose
-      # This ensures dj_database_url in settings.py uses the correct internal Docker host
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB}
       PORT: 8000
     depends_on:
@@ -21,17 +19,17 @@ services:
 
   # Database service for PostgreSQL
   db:
-    image: postgres:15-alpine # Uses the official PostgreSQL 15 Alpine image
+    image: postgres:15-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/ # Persistent volume for database data
     env_file:
-      - ./.env # Ensures the db service also loads environment variables
+      - ./.env
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432" # Expose PostgreSQL port (optional for local dev if only 'web' connects)
+      - "127.0.0.1:5432:5432" 
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
@@ -42,13 +40,27 @@ services:
   # Frontend service for the React application
   frontend:
     build:
-      context: ./frontend # Build context is the frontend directory
-      dockerfile: Dockerfile.frontend # Specify a separate Dockerfile for frontend
+      context: ./frontend
+      dockerfile: Dockerfile.frontend
     ports:
       - "5173:5173" # Vite's default port
     depends_on:
       web:
-        condition: service_started # Frontend needs web to be started to proxy requests
+        condition: service_started
+
+  # Caddy reverse proxy service
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy_portfolio_proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - web
+      - frontend
 
 # Define named volumes for data persistence
 volumes:

@@ -143,7 +143,7 @@ export default function App() {
             <section className="bg-white rounded-lg shadow-lg p-8 md:p-12 mt-8 mb-12 text-center max-w-4xl mx-auto flex flex-col items-center">
               <img
                 // Corrected LinkedIn profile picture URL
-                src="https://media.licdn.com/dms/image/v2/C5603AQGgbjWnJFvsYw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1614112552998?e=1756944000&v=beta&t=XgMuj9qVpedybusnkHmKUbzgRY12QKYQOJZwEG7Usio"
+                src="https://pub-a361f1bb745a47b9b0a8364c5790d8d5.r2.dev/osmar-linkedin.jpg"
                 alt="Osmar Betancourt"
                 className="w-32 h-32 rounded-full object-cover border-4 border-purple-500 shadow-md mb-6"
               />
