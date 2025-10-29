@@ -25,6 +25,7 @@ export default defineConfig(({ mode }) => {
     server: {
       host: '0.0.0.0', // Ensure Vite listens on all network interfaces inside Docker
       port: 5173,      // Explicitly set Vite's port
+      allowedHosts: frontendAllowedHosts, // Allow specified hosts for dev server
       proxy: {
         // Proxy API requests from React to Django backend
         '/api': {
