@@ -1,11 +1,11 @@
 betancourtosmar.com, www.betancourtosmar.com {
-  reverse_proxy localhost:5173
+  reverse_proxy frontend:5173
 }
 
 api.betancourtosmar.com {
-  reverse_proxy localhost:8000
+  reverse_proxy web:8000
 }
 
 ecommerce.betancourtosmar.com {
-  reverse_proxy localhost:5000
+  reverse_proxy 157.180.68.171:5000
 }

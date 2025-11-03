@@ -53,7 +53,9 @@ services:
     image: caddy:2-alpine
     container_name: caddy_portfolio_proxy
     restart: unless-stopped
-    network_mode: host
+    ports:
+      - "80:80"
+      - "443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
     depends_on:
