@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './index.css'; // Assuming you have an index.css for basic styling
 import ChatbotPopup from './components/ChatbotPopup'; // Import the ChatbotPopup component
 import CustomAIModelPage from './components/CustomAIModelPage'; // <--- NEW: Import CustomAIModelPage
+import CVModal from './components/CVModal'; // Import the CVModal component
 
 export default function App() {
   const [projects, setProjects] = useState([]); // State to store fetched projects
@@ -9,6 +10,7 @@ export default function App() {
   const [error, setError] = useState(null);   // State to store any fetch errors
   const [isChatbotOpen, setIsChatbotOpen] = useState(false); // State for chatbot popup visibility
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // State for mobile menu visibility
+  const [isCVModalOpen, setIsCVModalOpen] = useState(false); // State for CV modal visibility
 
   // Hardcoded certifications data for display
   const certifications = [
@@ -153,12 +155,20 @@ export default function App() {
               <p className="text-lg md:text-xl text-gray-700 mb-8 max-w-2xl">
                 AI Full Stack Engineer with 4+ years of experience specializing in integration and customization of AI agents and LLMs including OpenAI, Gemini, Hugging Face, and bespoke models within real-world platforms and MCPs. Demonstrates hands on expertise across the entire stack, building robust solutions that bridge cutting edge AI with proven software practices. Areas of proficiency include ETL data pipelines, full-stack development, and DevOps deployment, enabling seamless AI integration into both new and traditional software landscapes.
               </p>
-              <a
-                href="#projects" // Scroll to projects section
-                className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
-              >
-                View My Projects
-              </a>
+              <div className="flex flex-col gap-4 justify-center items-center">
+                <a
+                  href="#projects" // Scroll to projects section
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
+                >
+                  View My Projects
+                </a>
+                <button
+                  onClick={() => setIsCVModalOpen(true)}
+                  className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-full shadow-md transition duration-300 ease-in-out transform hover:scale-105 text-sm"
+                >
+                  Want to know more? Read my CV
+                </button>
+              </div>
             </section>
 
             {/* New Banner-like Separator for Projects section */}
@@ -342,6 +352,9 @@ export default function App() {
                 </svg>
               )}
             </button>
+
+            {/* CV Modal */}
+            <CVModal isOpen={isCVModalOpen} onClose={() => setIsCVModalOpen(false)} />
 
             {/* Render ChatbotPopup component based on isChatbotOpen state */}
             <ChatbotPopup isOpen={isChatbotOpen} onClose={() => setIsChatbotOpen(false)} />

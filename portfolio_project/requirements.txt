@@ -9,11 +9,11 @@ djangorestframework==3.15.1
 django-cors-headers==4.3.1
 Pillow==10.3.0
 requests==2.32.3
-gunicorn==22.0.0 
+gunicorn==23.0.0 
 dj-database-url==2.0.0
 whitenoise==6.6.0
 huggingface_hub==0.33.2
-google-auth==2.29.0
+google-auth==2.47.0
 pinecone-client==3.2.1
 transformers==4.41.2
 beautifulsoup4==4.12.3
