@@ -1,5 +1,5 @@
 # Add sentencepiece for tokenizers that require it
-sentencepiece==0.2.0
+sentencepiece==0.2.1
 # Add protobuf for LlamaTokenizer and other tokenizers that require it
 protobuf==4.25.3
 Django==5.0.6 # Or your preferred Django version
