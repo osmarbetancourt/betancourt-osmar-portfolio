@@ -76,4 +76,5 @@ volumes:
   media_data:
 
 networks:
-  caddy_net
+  caddy_net:
+    driver: bridge
