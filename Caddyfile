@@ -13,3 +13,7 @@ ecommerce.betancourtosmar.com {
 mcp.betancourtosmar.com {
   reverse_proxy outline-mcp:8765
 }
+
+mcp-gh.betancourtosmar.com {
+  reverse_proxy github-mcp:8766
+}
