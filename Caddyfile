@@ -11,5 +11,5 @@ ecommerce.betancourtosmar.com {
 }
 
 mcp.betancourtosmar.com {
-  reverse_proxy mcp:8765
+  reverse_proxy outline-mcp:8765
 }
