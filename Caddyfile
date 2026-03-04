@@ -9,3 +9,7 @@ api.betancourtosmar.com {
 ecommerce.betancourtosmar.com {
   reverse_proxy 157.180.68.171:5000
 }
+
+mcp.betancourtosmar.com {
+  reverse_proxy mcp:8765
+}

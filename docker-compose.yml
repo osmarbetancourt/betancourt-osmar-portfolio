@@ -16,6 +16,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - caddy_net
 
   # Database service for PostgreSQL
   db:
@@ -36,6 +38,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s # Give the database a bit of time to start before checking
+    networks:
+      - caddy_net
 
   # Frontend service for the React application
   frontend:
@@ -47,6 +51,8 @@ services:
     depends_on:
       web:
         condition: service_started
+    networks:
+      - caddy_net
 
   # Caddy reverse proxy service
   caddy:
@@ -61,8 +67,13 @@ services:
     depends_on:
       - web
       - frontend
+    networks:
+      - caddy_net
 
 # Define named volumes for data persistence
 volumes:
   postgres_data:
   media_data:
+
+networks:
+  caddy_net
