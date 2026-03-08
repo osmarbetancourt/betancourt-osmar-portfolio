@@ -17,3 +17,7 @@ mcp.betancourtosmar.com {
 mcp-gh.betancourtosmar.com {
   reverse_proxy github-mcp:8766
 }
+
+mcp-figma.betancourtosmar.com {
+  reverse_proxy figma-mcp:8767
+}
