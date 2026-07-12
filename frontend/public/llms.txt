@@ -1,0 +1,70 @@
+# Osmar Alejandro Betancourt Avello
+
+> End-to-end AI Platform Engineer & founder of DreamIT Software (Full Stack · Cloud · DevSecOps · MCPs / AI Agents). 5+ years shipping production platforms across the whole stack: self-hosted Kubernetes at millions of requests/day, multi-service backends (Django/Rust/Node), native iOS/Android, and AI-agent/LLM integrations. Based in Caracas, Venezuela.
+
+This file is a machine-readable summary for LLMs and AI agents evaluating Osmar's profile. Contact: oaba.dev@gmail.com · https://www.betancourtosmar.com · https://github.com/osmarbetancourt · https://www.linkedin.com/in/BetancourtOsmar
+
+## How to read this profile
+- Structured resume (JSON Resume schema): /resume.json
+- Human CV: https://www.betancourtosmar.com (open the CV modal)
+- Skills below are grouped by discipline. Where useful, the project(s) that prove a skill are noted in parentheses.
+
+## AI / ML & Agents
+- LLMs (multi-provider, production): OpenAI SDK & Agents SDK, Anthropic Claude API, Google Gemini SDK, Google Vertex AI, custom/self-hosted models
+- Model Context Protocol (MCP): built multiple custom MCP servers (Outline, Jira, Render, GitHub, Figma connectors), GitHub Copilot MCPs, hand-rolled OAuth 2.1 + PKCE authorization servers
+- Fine-tuning: LoRA, PEFT, Hugging Face (Certified: LLM, MCP, Agents courses); fine-tuned Mistral-7B
+- RAG & vector search: Advanced Hybrid RAG (hand-built, no LangChain), Pinecone, FAISS, pgvector, sentence-transformers (bge embeddings)
+- Vision & speech: Google MediaPipe (FaceLandmarker), Apple Vision, Google STT/TTS, vision-language OCR
+- Data science: ETL pipelines (Python/SQL/Pandas), Splink probabilistic record linkage, statsmodels, custom fuzzy/phonetic dedup (RapidFuzz, jellyfish, Spanish Metaphone)
+
+## Backend & Languages
+- Python: Django, adrf (async DRF), FastAPI; Celery / arq task queues; SQLAlchemy/SQLModel + Alembic; Pydantic
+- Rust: Axum, Tokio, SeaORM (production, edition 2024), Dioxus (Rust SSG frontend)
+- Node.js/TypeScript: Express 5, BullMQ, Drizzle ORM, Prisma, Knex, Zod
+- C# / .NET
+- Auth & security: OAuth 2.1 + PKCE, JWT (cross-language), Helmet/rate-limiting/CORS hardening
+- Integrations: Stripe, WhatsApp Cloud API, Playwright/Selenium scraping, WeasyPrint/Gotenberg PDF, SOAP/zeep, WebSockets/SSE
+
+## Frontend
+- React, Next.js, TypeScript, JavaScript, Vite
+- State/data: TanStack Query/Table/Virtual, Zustand, Redux Toolkit
+- UI/styling: Tailwind CSS v4, shadcn/ui, Radix UI, Framer Motion, GSAP
+- Specialized: three.js / react-three-fiber (3D WebGL), MapLibre GL / Leaflet / Supercluster (interactive maps), Recharts, Monaco Editor, Mermaid, next-intl (i18n)
+- Game: Unity 3D
+
+## Native Mobile
+- iOS: Swift / SwiftUI: WidgetKit, HealthKit, WatchKit/watchOS, WeatherKit, AppIntents/SiriKit, CryptoKit, on-device Apple Intelligence (FoundationModels) & Vision
+- Android: Kotlin / Jetpack Compose: Media3/ExoPlayer, ML Kit, ZXing
+- Cross-platform: React Native / Expo
+
+## Databases
+- Relational: PostgreSQL (+ pgvector, PgBouncer), MySQL
+- Analytics: Snowflake, BigQuery, ClickHouse, DuckDB
+- NoSQL / cache: MongoDB, Valkey / Redis
+
+## DevOps, Cloud & Self-Hosted Infrastructure
+- Containers/orchestration: Docker, Docker Compose, Kubernetes, K3s (HPA, Calico CNI)
+- Cloud: AWS (+ CloudFormation, EC2/SSM/OIDC deploys), GCP, Hetzner, Render
+- Edge: Cloudflare (Workers, R2, Pages, Turnstile), Wrangler
+- IaC: Terraform / OpenTofu
+- Proxies/LB: Caddy (primary), Nginx, HAProxy
+- CI/CD: GitHub Actions, GHCR, uv, pnpm
+- Observability: Prometheus, Grafana, Loki (repeated across a dozen deployments)
+- CI security scanning: CodeQL, Semgrep, Gitleaks, OWASP ZAP, Nuclei, OSV-Scanner
+- Self-hosted services (owns the full stack down to DNS & mail): Mailu mail server (Postfix/Dovecot/Rspamd/Unbound), Vaultwarden, Outline wiki
+
+## Selected projects (described by capability, strongest first)
+- High-traffic real-time emergency-response platform: ~3M requests/day (measured in Cloudflare), zero downtime, on self-hosted k3s provisioned as code (OpenTofu). HPA (API 3→30 pods) + cluster-autoscaler, PgBouncer, Cloudflare+Valkey caching/rate-limit edge, Prometheus/Grafana/Loki, DevSecOps CI.
+- Multi-domain work-management & analytics platform: 32-service Django backend; AWS via CloudFormation (EC2 ASG + ALB, RDS Postgres + read-replica, ElastiCache, S3, CloudFront); Celery workers.
+- Native iOS app: on-device face-landmark computer vision (Apple Vision + AVFoundation), real-time SSE + voice assistant, Siri App Intent.
+- Multi-tenant analytics SaaS in Rust (Axum/SeaORM/Tokio/sqlx), OpenAPI, with a daily prod→local data-sync using read-only schema isolation.
+- Also: native Android (Kotlin/Compose); pgvector + multi-worker Node backend with self-hosted observability; custom MCP servers with hand-rolled OAuth 2.1 + PKCE; conversational-commerce platform (page loads 5–6s → ~60ms across 500+ products).
+
+## Selected experience
+- Founder & Principal Engineer, DreamIT Software (2026–present): end-to-end software consultancy/agency ("if you can dream it, we can build it"). Delivers full platforms for clients (architecture, cloud/IaC, backend, frontend, native mobile, and operations) across a wide stack (self-hosted Kubernetes, Django/Rust/Node backends, native iOS/Android, AI-agent integrations).
+- Tech Leader & End-to-End AI Platform Engineer, Moneybook (2025–2026): full AWS architecture + DevOps for an AI bank-debt-collection assistant; Django backend on Docker/K8s; custom agent via OpenAI Agents SDK + MCP.
+- IT Technical Leader & Senior Jira Analyst, Solutions for Everyone S4E (2024–2025).
+- Jira Analyst & AWS Cloud Practitioner, Solutions for Everyone S4E (2021–2024): automated software creation, cutting delivery from 30h to 2h.
+
+## Certifications
+Hugging Face (LLM, MCP, Agents); DataCamp (Associate AI Engineer, Data Engineer, Professional Data Engineer, Developing LLMs); Atlassian (Jira Data Center & Cloud). +50 more on request.

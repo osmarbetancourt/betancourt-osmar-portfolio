@@ -52,9 +52,21 @@ export default function App() {
   const experiences = [
     {
       id: 1,
+      title: "Founder & Principal Engineer",
+      company: "DreamIT Software",
+      dates: "2026 (January) – Present",
+      location: "Remote",
+      description: [
+        "Founded an end-to-end software consultancy and development agency (\"if you can dream it, we can build it\"), delivering full platforms for clients from architecture and cloud infrastructure to backend, frontend, native mobile, and ongoing operations.",
+        "Architected and shipped production systems across a wide stack: high-traffic platforms on self-hosted Kubernetes, multi-service backends (Django, Rust/Axum, Node), and native iOS/Android apps.",
+        "Own the full delivery lifecycle: cloud/IaC (AWS CloudFormation, OpenTofu), CI/CD, observability (Prometheus/Grafana/Loki), and DevSecOps, while acting as the direct technical contact for clients."
+      ],
+    },
+    {
+      id: 2,
       title: "Tech Leader & End-to-End AI Platform Engineer",
       company: "Moneybook",
-      dates: "2025 (August) – Present",
+      dates: "2025 (August) – 2026 (January)",
       location: "Remote",
       description: [
         "Designed and implemented the full AWS architecture and DevOps strategy for a virtual AI assistant platform focused on bank debt collection.",
@@ -63,7 +75,7 @@ export default function App() {
       ],
     },
     {
-      id: 2,
+      id: 3,
       title: "IT Technical Leader & Senior Jira Analyst",
       company: "Solutions for Everyone S4E",
       dates: "2024 (March) – 2025 (August)",
@@ -76,7 +88,7 @@ export default function App() {
       ],
     },
     {
-      id: 3,
+      id: 4,
       title: "Jira Analyst & AWS Cloud Practitioner",
       company: "Solutions for Everyone S4E",
       dates: "2021 (June) – 2024 (March)",
@@ -153,7 +165,7 @@ export default function App() {
                 Hi, I'm <span className="text-purple-600">Osmar Betancourt</span>
               </h2>
               <p className="text-lg md:text-xl text-gray-700 mb-8 max-w-2xl">
-                AI Full Stack Engineer with 4+ years of experience specializing in integration and customization of AI agents and LLMs including OpenAI, Gemini, Hugging Face, and bespoke models within real-world platforms and MCPs. Demonstrates hands on expertise across the entire stack, building robust solutions that bridge cutting edge AI with proven software practices. Areas of proficiency include ETL data pipelines, full-stack development, and DevOps deployment, enabling seamless AI integration into both new and traditional software landscapes.
+                End-to-end AI platform engineer and software-agency founder with 5+ years of experience. I architect and ship production systems across the whole stack: self-hosted Kubernetes handling millions of requests/day, multi-service backends (Django, Rust, Node), native iOS/Android apps, and AI-agent/LLM integrations (OpenAI, Anthropic, Gemini, MCP). Equally at home in cloud/IaC, CI/CD, observability, and DevSecOps, owning delivery from architecture to operations.
               </p>
               <div className="flex flex-col gap-4 justify-center items-center">
                 <a

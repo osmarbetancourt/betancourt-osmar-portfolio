@@ -1,5 +1,5 @@
 <h2 align="center" style="font-size:1.6em">Osmar Alejandro Betancourt Avello</h2>
-<p align="center" style="font-size:1.1em"><b>Tech Leader & End-to-End AI Platform Engineer (Full Stack · Cloud · DevSecOps · Security · MCPs - Agents)</b></p>
+<p align="center" style="font-size:1.1em"><b>Tech Leader & End-to-End AI Platform Engineer (Full Stack · Cloud · DevSecOps · Security · MCPs & Agents)</b></p>
 <p align="center" style="font-size:0.95em">
   <b>Phone:</b> +584121817101 &nbsp;|&nbsp; <b>Email:</b> oaba.dev@gmail.com &nbsp;|&nbsp; <b>Location:</b> Caracas, VE
 </p>
@@ -19,136 +19,71 @@
 
 ## 📝 Summary
 
-AI Full Stack Engineer with 4+ years of experience specializing in integration and customization of AI agents and LLMs including OpenAI, Gemini, Hugging Face, and bespoke models within real-world platforms and MCPs. Demonstrates hands on expertise across the entire stack, building robust solutions that bridge cutting edge AI with proven software practices. Areas of proficiency include ETL data pipelines, full-stack development, and DevOps deployment, enabling seamless AI integration into both new and traditional software landscapes.
+End-to-end AI platform engineer and software-agency founder with 5+ years of experience. I architect and ship production systems across the whole stack: self-hosted Kubernetes handling millions of requests/day, multi-service backends (Django, Rust, Node), native iOS/Android apps, and AI-agent/LLM integrations (OpenAI, Anthropic, Gemini, MCP). Equally at home in cloud/IaC, CI/CD, observability, and DevSecOps, owning delivery from architecture to operations.
 
 ---
 
 ## 🛠️ Skills & Technologies
 
-<table width="100%">
-  <tr>
-    <td valign="top" width="33%">
-      <b><img src="https://cdn.simpleicons.org/python/3776AB" height="18" style="vertical-align:middle" alt="Python Logo"/> Python</b><br>
-      <img src="https://cdn.simpleicons.org/pandas/150458" height="18" style="vertical-align:middle" alt="Pandas Logo"/> <b>Pandas</b><br>
-      <img src="https://cdn.simpleicons.org/pytorch/EE4C2C" height="18" style="vertical-align:middle" alt="PyTorch Logo"/> <b>PyTorch</b><br>
-      <b>LoRA</b><br>
-      <b>PEFT</b><br>
-      <img src="https://cdn.simpleicons.org/huggingface/fcc419" height="18" style="vertical-align:middle" alt="HuggingFace Logo"/> <b>Hugging Face LLMs (Certified)</b><br>
-      <b>LLMs</b> (OpenAI, Gemini, Custom, RAG, Q&A)<br>
-      <b>ETL Pipelines</b> (Python, SQL, Pandas)<br>
-      <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Pinecone-Full-Logo-Black.svg" height="18" style="vertical-align:middle" alt="Pinecone Logo"/> <b>Pinecone</b><br>
-      <img src="https://cdn.simpleicons.org/unity/000000" height="18" style="vertical-align:middle" alt="Unity Logo"/> <b>Unity 3D</b><br>
-      <img src="https://upload.wikimedia.org/wikipedia/commons/b/bd/Logo_C_sharp.svg" height="18" style="vertical-align:middle" alt="C# Logo"/> <b>C#</b><br>
-      <img src="https://cdn.simpleicons.org/googlecloud/4285F4" height="18" style="vertical-align:middle" alt="GCP Logo"/> <b>GCP</b><br>
-      <img src="https://simpleicons.org/icons/render.svg" height="18" style="vertical-align:middle" alt="Render Logo"/> <b>Render</b><br>
-      <img src="https://cdn.simpleicons.org/hetzner/D50C2D" height="18" style="vertical-align:middle" alt="Hetzner Logo"/> <b>Hetzner</b><br>
-    </td>
-    <td valign="top" width="33%">
-      <img src="https://cdn.simpleicons.org/docker/2496ED" height="18" style="vertical-align:middle" alt="Docker Logo"/> <b>Docker</b><br>
-      <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/docker-compose.png" height="18" style="vertical-align:middle" alt="Docker Compose Logo"/> <b>Docker Compose</b><br>
-      <img src="https://cdn.simpleicons.org/kubernetes/326CE5" height="18" style="vertical-align:middle" alt="Kubernetes Logo"/> <b>Kubernetes (K8s)</b><br>
-      <img src="https://raw.githubusercontent.com/cncf/artwork/master/projects/k3s/icon/color/k3s-icon-color.png" height="18" style="vertical-align:middle" alt="K3s Logo"/> <b>K3s</b><br>
-      <img src="https://cdn.simpleicons.org/postgresql/4169E1" height="18" style="vertical-align:middle" alt="Postgres Logo"/> <b>Postgres</b><br>
-      <img src="https://cdn.simpleicons.org/mysql/4479A1" height="18" style="vertical-align:middle" alt="MySQL Logo"/> <b>MySQL</b><br>
-      <img src="https://cdn.simpleicons.org/huggingface/fcc419" height="18" style="vertical-align:middle" alt="HuggingFace Logo"/> <b>MCP (Hugging Face)</b><br>
-      <img src="https://cdn.simpleicons.org/snowflake/29B5E8" height="18" style="vertical-align:middle" alt="Snowflake Logo"/> <b>Snowflake</b><br>
-      <img src="https://cdn.simpleicons.org/mongodb/47A248" height="18" style="vertical-align:middle" alt="MongoDB Logo"/> <b>NoSQL</b><br>
-      <img src="https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg" height="18" style="vertical-align:middle" alt="AWS Logo"/> <b>AWS</b><br>
-      <img src="https://cdn.worldvectorlogo.com/logos/aws-cloudformation.svg" height="18" style="vertical-align:middle" alt="CloudFormation Logo"/> <b>AWS CloudFormation</b><br>
-      <img src="https://cdn.simpleicons.org/jirasoftware/0052CC" height="18" style="vertical-align:middle" alt="Jira Logo"/> <b>JIRA</b><br>
-      <img src="https://cdn.simpleicons.org/githubactions/2088FF" height="18" style="vertical-align:middle" alt="GitHub Actions Logo"/>CI/CD GitHub Actions<br>
-    </td>
-    <td valign="top" width="33%">
-      <img src="https://cdn.simpleicons.org/react/61DAFB" height="18" style="vertical-align:middle" alt="React Logo"/> <b>React</b><br>
-      <img src="https://cdn.simpleicons.org/nextdotjs/000000" height="18" style="vertical-align:middle" alt="Next.js Logo"/> <b>Next.js</b><br>
-      <img src="https://cdn.simpleicons.org/typescript/3178C6" height="18" style="vertical-align:middle" alt="TypeScript Logo"/> <b>TypeScript</b><br>
-      <img src="https://cdn.simpleicons.org/javascript/F7DF1E" height="18" style="vertical-align:middle" alt="JavaScript Logo"/> <b>JavaScript</b><br>
-      <img src="https://cdn.simpleicons.org/huggingface/fcc419" height="18" style="vertical-align:middle" alt="HuggingFace Logo"/> <b>Hugging Face Agents (Certified)</b><br>
-      <img src="https://cdn.simpleicons.org/django/092E20" height="18" style="vertical-align:middle" alt="Django Logo"/> <b>Django</b><br>
-      <img src="https://cdn.simpleicons.org/github/181717" height="18" style="vertical-align:middle" alt="GitHub Logo"/> <b>Git & GitHub</b><br>
-      <img src="https://cdn.simpleicons.org/githubcopilot/939aff" height="18" style="vertical-align:middle" alt="GitHub Copilot Logo"/> <b>Copilot Custom MCPs</b><br>
-      <b>Advanced Hybrid RAG</b><br>
-      <b>FAISS</b><br>
-      <b>Google STT & TTS</b><br>
-      <img src="https://cdn.simpleicons.org/googlecloud/4285F4" height="18" style="vertical-align:middle" alt="Google Vertex AI Logo"/> <b>Google Vertex AI</b><br>
-      <img src="https://cdn.simpleicons.org/openai/412991" height="18" style="vertical-align:middle" alt="OpenAI Logo"/> <b>OpenAI SDK</b><br>
-      <img src="https://cdn.simpleicons.org/rust/000000" height="18" style="vertical-align:middle" alt="Rust Logo"/>Rust<br>
-      <img src="https://upload.wikimedia.org/wikipedia/commons/6/60/Tokio_logo.svg" height="18" style="vertical-align:middle" alt="Rust Logo"/>Tokio-Axum<br>
-    </td>
-  </tr>
-</table>
+**AI / ML & Agents**: Python, PyTorch, Pandas · LLMs: OpenAI SDK & Agents SDK, Anthropic Claude, Google Gemini, Vertex AI, custom models · Model Context Protocol (MCP): custom MCP servers, Copilot MCPs · Fine-tuning: LoRA, PEFT, Hugging Face *(Certified)* · RAG & vector search: Advanced Hybrid RAG, Pinecone, FAISS, pgvector, sentence-transformers · Vision & speech: Google MediaPipe, Apple Vision, Google STT/TTS, OCR · Data: ETL pipelines (Python/SQL/Pandas), Splink record linkage, statsmodels
+
+**Backend & Languages**: Python (Django, async DRF/adrf, FastAPI) · Rust (Axum, Tokio, SeaORM) · Node.js (Express) · C# · Task queues: Celery, BullMQ, arq · ORMs & validation: SQLAlchemy, Drizzle, Prisma, Pydantic, Zod · Auth & security: OAuth 2.1 + PKCE, JWT, reCAPTCHA/Turnstile · Integrations: Stripe, WhatsApp Cloud API, Playwright/Selenium, WeasyPrint/Gotenberg
+
+**Frontend**: React, Next.js, TypeScript, JavaScript, Vite · TanStack Query/Table, Zustand, Redux Toolkit · Tailwind CSS, shadcn/ui, Framer Motion, GSAP · three.js, MapLibre/Leaflet, Recharts, Monaco Editor · Unity 3D
+
+**Native Mobile**: iOS: Swift/SwiftUI (WidgetKit, HealthKit, watchOS, on-device Apple Intelligence & Vision) · Android: Kotlin/Jetpack Compose · React Native / Expo
+
+**Databases**: PostgreSQL (+ pgvector, PgBouncer), MySQL, MongoDB · Snowflake, BigQuery, ClickHouse, DuckDB · Valkey/Redis
+
+**DevOps, Cloud & Self-Hosted Infra**: Docker, Kubernetes (K8s), K3s · AWS (+ CloudFormation), GCP, Hetzner, Render · Cloudflare (Workers, R2, Pages, Turnstile) · Terraform/OpenTofu · Caddy, Nginx, HAProxy · CI/CD: GitHub Actions, GHCR · Observability: Prometheus, Grafana, Loki · Security in CI: CodeQL, Semgrep, Gitleaks, OWASP ZAP · Self-hosted services: own mail server (Mailu), Vaultwarden, Outline wiki
 
 ---
 
 ## 🚀 Projects
 
-- **AI-Powered Ecommerce Platform (Next.js/Node/LLM)**  
-  Designed and developed an advanced grocery platform that reduced load times from 5–6 seconds to just 60ms across 500+ products. The platform features an AI Agent that lets users manage their cart, get instant product and recipe recommendations, and complete checkout all through natural conversation. Integrated Retrieval Augmented Generation (RAG) and analytics deliver an AI-driven experience and speed that surpass typical online grocery stores.
-  
-- **Designed and built a robust, extensible MCP server with Render Services Integration**  
-  Designed and built a robust, extensible MCP server that bridges modern AI agents (like GitHub Copilot) with any API-powered service. Integrated the Render.com API to dynamically expose cloud infrastructure tools as MCP-compatible endpoints, enabling programmatic control and orchestration via natural language and agent-driven workflows.
+- **High-Traffic Real-Time Emergency-Response Platform**: *self-hosted Kubernetes, ~3M requests/day, zero downtime*  
+  Architected and operated a public crisis-mapping platform that sustained **~3M requests/day (measured in Cloudflare) with no downtime** during a live disaster. Provisioned the k3s cluster **as code (OpenTofu)** and tuned autoscaling for spikes (**HPA 3→30 API pods** plus a cluster-autoscaler). Shielded Postgres with **PgBouncer** and a **Cloudflare + Valkey caching/rate-limit edge**, with full Prometheus/Grafana/Loki observability and a DevSecOps CI pipeline. *Stack: Next.js · Express · Drizzle/Postgres · BullMQ · Valkey · k3s · OpenTofu · Cloudflare.*
 
-- **Developed a scalable Retrieval Augmented Generation (RAG) System for Knowledge Q&A**  
-  Developed a scalable RAG system using Pinecone, Hugging Face, and custom embedding models for enterprise knowledge search and contextual Q&A. Designed ETL pipelines for document ingestion, achieving sub-second retrieval latency and high-accuracy answers on 100K+ documents.
+- **Multi-Domain Work-Management & Analytics Platform**: *32-service Django backend, AWS IaC*  
+  Built a ClickUp/Jira-class internal platform spanning **32 domain services** (billing, boards, HR, automation, analytics, permissions, Jira/GitHub integrations). Deployed on **AWS defined entirely in CloudFormation**: EC2 Auto Scaling Group behind an ALB, RDS Postgres with a **streaming read-replica**, ElastiCache, S3, and CloudFront, plus Celery workers and a scraping service. *Stack: Django · Celery · Postgres (+replica) · Valkey · Next.js · AWS CloudFormation.*
 
-<sub>Other projects: Built an Interactive Portfolio with LLM & Generative AI (Django/React, Gemini, custom LLM agents, live Q&A and AI-assisted demos)</sub>
+- **Native iOS App with On-Device Computer Vision & Real-Time Voice**  
+  Shipped a native SwiftUI app (iOS 18) performing **on-device face-landmark analysis with Apple Vision + AVFoundation**: no server round-trip, fully private, plus a real-time SSE stream, live voice assistant, and Siri App Intent. *Stack: Swift/SwiftUI · Vision · AVFoundation · SSE · Siri Intents.*
+
+<sub>Also: Rust (Axum/SeaORM) analytics SaaS · native Android (Kotlin/Compose) app · custom MCP servers with hand-rolled OAuth 2.1 + PKCE · a commerce platform cut from 5–6s to ~60ms page loads · self-hosted mail, secrets, and wiki.</sub>
 
 ---
 
 ## 💼 Professional Experience
 
+**Founder & Principal Engineer**  
+_DreamIT Software · end-to-end software consultancy & development agency_  
+2026 (January) – Present  
+- Founded an end-to-end software agency ("if you can dream it, we can build it") delivering full platforms for clients, from architecture and cloud infrastructure to backend, frontend, native mobile, and ongoing operations.
+- Architected and shipped production systems across a wide stack: high-traffic platforms on self-hosted Kubernetes, multi-service backends (Django, Rust/Axum, Node), native iOS/Android apps, and AI-agent integrations.
+- Own the full delivery lifecycle solo or lead: cloud/IaC (AWS CloudFormation, OpenTofu), CI/CD, observability (Prometheus/Grafana/Loki), and DevSecOps, while acting as the direct technical contact for clients.
+
 **Tech Leader & End-to-End AI Platform Engineer**  
 _Moneybook_  
-2025 (August) – Present  
+2025 (August) – 2026 (January)  
 - Designed and implemented the full AWS architecture and DevOps strategy for a virtual AI assistant platform focused on bank debt collection.
 - Developed the entire backend in Django, containerizing the solution with Docker and K8s, integrating best practices for scalable deployments.
 - Engineered a custom AI agent using OpenAI Agents SDK and Model Context Protocol (MCP) for advanced automation and integration.
 
 **IT Technical Leader & Senior Jira Analyst**  
-_Solutions for Everyone S4E_  
-2024 (March) – 2025 (August)  
-- Led technical projects and teams, software validation, and AI solution design (Jira/Customer ChatBots).
-- Delivered robust full-stack software solutions and deployed AI agents within cloud environments.
-- Acted as the main technical representative in customer meetings, translating requirements and presenting solutions.
-- Mentored and trained new team members, fostering a collaborative environment.
+_Solutions for Everyone S4E_ · 2024 (March) – 2025 (August)  
+- Led technical teams, software validation, and AI solution design (Jira / customer chatbots); delivered full-stack solutions and deployed AI agents in cloud environments.
+- Main technical representative in customer meetings, translating requirements into solutions; mentored new team members.
 
 **Jira Analyst & AWS Cloud Practitioner**  
-_Solutions for Everyone S4E_  
-2021 (June) – 2024 (March)  
-- Led and coordinated technical projects using agile methodologies (Kanban and Scrum) to ensure project continuity and timely delivery.
-- Automated key software creation processes, reducing delivery time from 30 hours to 2 hours and significantly increasing team efficiency.
-- Provided expert guidance and removed technical roadblocks for the team.
-- Managed successful Jira and AWS integrations, collaborating with cross-functional teams.
+_Solutions for Everyone S4E_ · 2021 (June) – 2024 (March)  
+- Coordinated technical projects with agile methodologies (Kanban/Scrum) and managed Jira + AWS integrations across cross-functional teams.
+- Automated key software-creation processes, **cutting delivery time from 30 hours to 2 hours**.
 
 ---
 
 ## 🏅 Certifications
 
-<table width="100%">
-  <tr>
-    <td valign="top" width="33%" style="vertical-align:top; text-align:left;">
-      <ul>
-        <li>Hugging Face Certified: Large Language Models (LLM) Course</li>
-        <li>Hugging Face Certified: Model Context Protocol (MCP) Course</li>
-        <li>Hugging Face Certified: Agents Course</li>
-      </ul>
-    </td>
-    <td valign="top" width="33%" style="vertical-align:top; text-align:left;">
-      <ul>
-        <li>Datacamp Associate AI Engineer for Developers</li>
-        <li>Datacamp Data Engineer in Python</li>
-        <li>Datacamp Professional Data Engineer in Python</li>
-        <li>Datacamp Developing Large Language Models</li>
-      </ul>
-    </td>
-    <td valign="top" width="33%" style="vertical-align:top; text-align:left;">
-      <ul>
-        <li>Atlassian Certified in Managing Jira Projects for Data Center</li>
-        <li>Atlassian Certified in Managing Jira Projects for Cloud</li>
-        <li><sub>+50 more IT/AI certifications upon request</sub></li>
-      </ul>
-    </td>
-  </tr>
-</table>
+**Hugging Face** (Certified): Large Language Models · Model Context Protocol (MCP) · Agents · **DataCamp:** Associate AI Engineer, Data Engineer, Professional Data Engineer, Developing LLMs · **Atlassian:** Managing Jira Projects (Data Center & Cloud) · *+50 more IT/AI certifications on request*
 
 ---

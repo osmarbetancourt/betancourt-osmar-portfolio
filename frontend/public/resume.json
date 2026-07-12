@@ -1,0 +1,117 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/v1.0.0/schema.json",
+  "basics": {
+    "name": "Osmar Alejandro Betancourt Avello",
+    "label": "Tech Leader & End-to-End AI Platform Engineer (Full Stack · Cloud · DevSecOps · MCPs / AI Agents)",
+    "email": "oaba.dev@gmail.com",
+    "phone": "+584121817101",
+    "url": "https://www.betancourtosmar.com",
+    "summary": "End-to-end AI platform engineer and software-agency founder with 5+ years of experience. Architects and ships production systems across the whole stack: self-hosted Kubernetes handling millions of requests/day, multi-service backends (Django, Rust, Node), native iOS/Android apps, and AI-agent/LLM integrations (OpenAI, Anthropic, Gemini, MCP), owning delivery from architecture through cloud/IaC, CI/CD, observability, and DevSecOps.",
+    "location": { "city": "Caracas", "countryCode": "VE", "region": "Distrito Capital" },
+    "profiles": [
+      { "network": "GitHub", "username": "osmarbetancourt", "url": "https://github.com/osmarbetancourt" },
+      { "network": "LinkedIn", "username": "BetancourtOsmar", "url": "https://www.linkedin.com/in/BetancourtOsmar" }
+    ]
+  },
+  "work": [
+    {
+      "name": "DreamIT Software",
+      "position": "Founder & Principal Engineer",
+      "startDate": "2026-01",
+      "summary": "End-to-end software consultancy & development agency ('if you can dream it, we can build it'). Delivers full platforms for clients from architecture and cloud infrastructure to backend, frontend, native mobile, and operations.",
+      "highlights": [
+        "Founded an end-to-end software agency delivering full platforms for clients: architecture, cloud infrastructure, backend, frontend, native mobile, and ongoing operations.",
+        "Architected and shipped production systems across a wide stack: high-traffic platforms on self-hosted Kubernetes, multi-service backends (Django, Rust/Axum, Node), and native iOS/Android apps.",
+        "Own the full delivery lifecycle: cloud/IaC (AWS CloudFormation, OpenTofu), CI/CD, observability (Prometheus/Grafana/Loki), and DevSecOps, while acting as the direct technical contact for clients."
+      ]
+    },
+    {
+      "name": "Moneybook",
+      "position": "Tech Leader & End-to-End AI Platform Engineer",
+      "startDate": "2025-08",
+      "endDate": "2026-01",
+      "highlights": [
+        "Designed and implemented the full AWS architecture and DevOps strategy for a virtual AI assistant platform focused on bank debt collection.",
+        "Developed the entire backend in Django, containerized with Docker and Kubernetes for scalable deployments.",
+        "Engineered a custom AI agent using the OpenAI Agents SDK and Model Context Protocol (MCP)."
+      ]
+    },
+    {
+      "name": "Solutions for Everyone (S4E)",
+      "position": "IT Technical Leader & Senior Jira Analyst",
+      "startDate": "2024-03",
+      "endDate": "2025-08",
+      "highlights": [
+        "Led technical projects and teams, software validation, and AI solution design (Jira / customer chatbots).",
+        "Delivered full-stack software solutions and deployed AI agents within cloud environments.",
+        "Main technical representative in customer meetings; mentored and trained new team members."
+      ]
+    },
+    {
+      "name": "Solutions for Everyone (S4E)",
+      "position": "Jira Analyst & AWS Cloud Practitioner",
+      "startDate": "2021-06",
+      "endDate": "2024-03",
+      "highlights": [
+        "Coordinated technical projects using agile methodologies (Kanban, Scrum).",
+        "Automated software creation processes, reducing delivery time from 30 hours to 2 hours.",
+        "Managed successful Jira and AWS integrations across cross-functional teams."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "High-Traffic Real-Time Emergency-Response Platform (self-hosted Kubernetes)",
+      "description": "Architected and operated a public crisis-mapping platform sustaining ~3M requests/day (measured in Cloudflare) with zero downtime. Provisioned a k3s cluster as code with OpenTofu; tuned HPA (API pods 3→30) plus cluster-autoscaler for emergency spikes; shielded Postgres with PgBouncer and a Cloudflare+Valkey caching/rate-limit edge; ran Prometheus/Grafana/Loki observability and a DevSecOps CI pipeline.",
+      "keywords": ["Kubernetes", "k3s", "OpenTofu", "HPA", "Cluster Autoscaler", "PgBouncer", "Cloudflare", "Valkey", "Next.js", "Express", "Drizzle", "BullMQ", "Prometheus", "Grafana", "Loki"]
+    },
+    {
+      "name": "Multi-Domain Work-Management & Analytics Platform",
+      "description": "ClickUp/Jira-class internal platform spanning 32 domain services (billing, capacity, boards, HR, automation, ingestion, analytics, permissions, Jira/GitHub integrations). Deployed on AWS defined entirely in CloudFormation: EC2 ASG behind ALB, RDS Postgres with streaming read-replica, ElastiCache, S3, CloudFront.",
+      "keywords": ["Django", "Celery", "PostgreSQL", "read-replica", "Valkey", "Next.js", "AWS CloudFormation", "ALB", "RDS", "CloudFront"]
+    },
+    {
+      "name": "Native iOS App: On-Device Computer Vision & Real-Time Voice",
+      "description": "Native SwiftUI app (iOS 18) performing on-device face-landmark analysis with Apple Vision + AVFoundation (no server round-trip). Real-time SSE event stream, live voice assistant, Siri App Intent, notification-service extension; XcodeGen project.",
+      "keywords": ["Swift", "SwiftUI", "Apple Vision", "AVFoundation", "on-device ML", "SSE", "Siri Intents", "XcodeGen"]
+    },
+    {
+      "name": "Multi-Tenant Analytics SaaS in Rust",
+      "description": "Type-safe async analytics backend in Rust (Axum, SeaORM, Tokio, sqlx) with OpenAPI docs, Docker/Caddy CI. Sibling financial build adds a daily prod→local data-sync with read-only schema isolation for safe analytics on production data.",
+      "keywords": ["Rust", "Axum", "SeaORM", "Tokio", "sqlx", "PostgreSQL", "Valkey", "Next.js", "Caddy"]
+    },
+    {
+      "name": "Native Android app · pgvector multi-worker backend · MCP servers",
+      "description": "Native Android (Kotlin/Jetpack Compose) companion app; a pgvector + multi-worker (BullMQ) Node backend with self-hosted Prometheus/Loki/Grafana; and custom MCP servers (Jira/Render/Outline/GitHub) with hand-rolled OAuth 2.1 + PKCE.",
+      "keywords": ["Kotlin", "Jetpack Compose", "pgvector", "BullMQ", "MCP", "OAuth 2.1 + PKCE"]
+    },
+    {
+      "name": "Self-hosted infrastructure",
+      "description": "Owns the full stack down to DNS and mail: self-hosted Mailu mail server (Postfix/Dovecot/Rspamd/Unbound), HashiCorp Vault / Vaultwarden, and Outline wiki, fronted by Caddy with a Prometheus/Grafana/Loki observability stack.",
+      "keywords": ["Mailu", "Caddy", "Vault", "Vaultwarden", "Outline", "Prometheus", "Grafana"]
+    }
+  ],
+  "certificates": [
+    { "name": "Hugging Face: Large Language Models (LLM) Course", "issuer": "Hugging Face" },
+    { "name": "Hugging Face: Model Context Protocol (MCP) Course", "issuer": "Hugging Face" },
+    { "name": "Hugging Face: Agents Course", "issuer": "Hugging Face" },
+    { "name": "Associate AI Engineer for Developers", "issuer": "DataCamp" },
+    { "name": "Professional Data Engineer in Python", "issuer": "DataCamp" },
+    { "name": "Developing Large Language Models", "issuer": "DataCamp" },
+    { "name": "Managing Jira Projects (Data Center & Cloud)", "issuer": "Atlassian" }
+  ],
+  "skills": [
+    { "name": "AI / ML & Agents", "keywords": ["OpenAI SDK", "OpenAI Agents SDK", "Anthropic Claude API", "Google Gemini", "Google Vertex AI", "Model Context Protocol (MCP)", "Custom MCP Servers", "LoRA", "PEFT", "Hugging Face", "Advanced Hybrid RAG", "Pinecone", "FAISS", "pgvector", "sentence-transformers", "Google MediaPipe", "Apple Vision", "Google STT/TTS", "Splink", "statsmodels", "PyTorch", "Pandas"] },
+    { "name": "Backend & Languages", "keywords": ["Python", "Django", "adrf (async DRF)", "FastAPI", "Rust", "Axum", "Tokio", "SeaORM", "Node.js", "Express 5", "C#", "Celery", "BullMQ", "arq", "SQLAlchemy", "Drizzle ORM", "Prisma", "Pydantic", "Zod", "OAuth 2.1 + PKCE", "JWT", "Stripe", "WhatsApp Cloud API", "Playwright", "Selenium"] },
+    { "name": "Frontend", "keywords": ["React", "Next.js", "TypeScript", "JavaScript", "Vite", "TanStack Query", "Zustand", "Redux Toolkit", "Tailwind CSS", "shadcn/ui", "Radix UI", "Framer Motion", "GSAP", "three.js", "MapLibre GL", "Leaflet", "Recharts", "Monaco Editor", "next-intl", "Unity 3D"] },
+    { "name": "Native Mobile", "keywords": ["Swift", "SwiftUI", "WidgetKit", "HealthKit", "watchOS", "WeatherKit", "Apple Intelligence (FoundationModels)", "Kotlin", "Jetpack Compose", "React Native", "Expo"] },
+    { "name": "Databases", "keywords": ["PostgreSQL", "pgvector", "PgBouncer", "MySQL", "MongoDB", "Snowflake", "BigQuery", "ClickHouse", "DuckDB", "Valkey", "Redis"] },
+    { "name": "DevOps, Cloud & Self-Hosted Infra", "keywords": ["Docker", "Docker Compose", "Kubernetes", "K3s", "AWS", "AWS CloudFormation", "GCP", "Hetzner", "Render", "Cloudflare (Workers/R2/Pages/Turnstile)", "Terraform", "OpenTofu", "Caddy", "Nginx", "HAProxy", "GitHub Actions", "GHCR", "Prometheus", "Grafana", "Loki", "CodeQL", "Semgrep", "Gitleaks", "OWASP ZAP", "Mailu (self-hosted mail)", "Vaultwarden", "Outline"] }
+  ],
+  "certificates_note": "+50 more IT/AI certifications available on request",
+  "meta": {
+    "canonical": "https://www.betancourtosmar.com/resume.json",
+    "version": "2026-07",
+    "note": "Skills verified by static analysis of Osmar's own repositories (dependency manifests and source imports)."
+  }
+}

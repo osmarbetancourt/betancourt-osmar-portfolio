@@ -31,3 +31,5 @@ staticfiles/       # Collected static files (generated during deployment, not so
 *.mo               # Compiled message files for internationalization
 
 .vscode/
+MISSING_TECHS_FOR_CV.md
+frontend/src/assets/CV_Osmar_Betancourt.pdf
