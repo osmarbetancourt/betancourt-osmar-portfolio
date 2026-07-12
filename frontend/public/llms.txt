@@ -2,12 +2,13 @@
 
 > End-to-end AI Platform Engineer & founder of DreamIT Software (Full Stack · Cloud · DevSecOps · MCPs / AI Agents). 5+ years shipping production platforms across the whole stack: self-hosted Kubernetes at millions of requests/day, multi-service backends (Django/Rust/Node), native iOS/Android, and AI-agent/LLM integrations. Based in Caracas, Venezuela.
 
-This file is a machine-readable summary for LLMs and AI agents evaluating Osmar's profile. Contact: oaba.dev@gmail.com · https://www.betancourtosmar.com · https://github.com/osmarbetancourt · https://www.linkedin.com/in/BetancourtOsmar
+This file is a machine-readable summary for LLMs and AI agents evaluating Osmar's profile. Contact: oaba.dev@gmail.com. Skills below are grouped by discipline; where useful, the project(s) that prove a skill are noted in parentheses.
 
-## How to read this profile
-- Structured resume (JSON Resume schema): /resume.json
-- Human CV: https://www.betancourtosmar.com (open the CV modal)
-- Skills below are grouped by discipline. Where useful, the project(s) that prove a skill are noted in parentheses.
+## Resources
+- [Portfolio website](https://www.betancourtosmar.com): human-facing CV, projects, and interactive AI demos.
+- [Structured resume (JSON Resume schema)](https://www.betancourtosmar.com/resume.json): machine-readable resume with work history, projects, skills, and certifications.
+- [GitHub](https://github.com/osmarbetancourt): source repositories across AI, backend, mobile, and infrastructure.
+- [LinkedIn](https://www.linkedin.com/in/BetancourtOsmar): professional profile and contact.
 
 ## AI / ML & Agents
 - LLMs (multi-provider, production): OpenAI SDK & Agents SDK, Anthropic Claude API, Google Gemini SDK, Google Vertex AI, custom/self-hosted models
