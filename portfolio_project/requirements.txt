@@ -1,22 +1,23 @@
 # Add sentencepiece for tokenizers that require it
 sentencepiece==0.2.1
 # Add protobuf for LlamaTokenizer and other tokenizers that require it
-protobuf==4.25.3
-Django==5.0.6 # Or your preferred Django version
+protobuf==5.29.5
+Django==5.2.18
 python-dotenv==1.0.0 # Or the latest stable version
 psycopg2-binary==2.9.9 # Or the latest stable version for PostgreSQL database adapter
 djangorestframework==3.15.1
 django-cors-headers==4.3.1
-Pillow==10.3.0
-requests==2.32.3
+Pillow==13.0.0
+requests==2.33.0
 gunicorn==23.0.0 
 dj-database-url==2.0.0
 whitenoise==6.6.0
-huggingface_hub==0.33.2
+huggingface_hub==1.33.0
 google-auth==2.47.0
 pinecone-client==3.2.1
-transformers==4.41.2
+transformers==5.10.0
 beautifulsoup4==4.12.3
-lxml==5.2.2
+lxml==6.1.0
 readability-lxml==0.8.1
 pysafebrowsing==0.1.4
+certifi>=2026.10.19
